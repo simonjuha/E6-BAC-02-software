@@ -8,6 +8,7 @@
 #include "booleanDriver/gpioDriver.hpp"
 #include "displayDriver/displayDriver.hpp"
 #include "cvDriver/adcDriver.hpp"
+#include "ledDriver/ledDriver.hpp"
 
  
 
@@ -109,7 +110,7 @@ void setup()
             }
             t1.tick();
             t2.tick();
-            if(lastRead > adc.read() + 10 || lastRead < adc.read() - 10){
+            if(lastRead > adc.read() + 100 || lastRead < adc.read() - 100){
                 display.writeLine("adc: " + String(adc.read()));
                 lastRead = adc.read();
             }
@@ -130,8 +131,15 @@ void setup()
         d.attach(&t4);
         d7.attach(&t4);
 
+        LedDriver led = LedDriver(35);
+
         while(1){
             vTaskDelay(10 / portTICK_PERIOD_MS); 
+            if(d.read()){
+                led.set(false);
+            }else{
+                led.set(true);
+            }
             t3.tick();
             t4.tick();
         }
