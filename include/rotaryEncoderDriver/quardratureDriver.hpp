@@ -70,34 +70,6 @@ namespace Quad{
             bool clkLastState = false;
             bool clkNewState = false;
     };
-
-    // hardcodes setup instead of class
-    /*
-    Quardrature q0 = Quardrature(QUADRATURE0_CLK, QUADRATURE0_DT);
-    Quardrature q1 = Quardrature(QUADRATURE0_CLK, QUADRATURE0_DT);
-    
-    void quadratureInterrupt0(){
-        q0.checkChange();
-
-    }
-
-    void quadratureInterrupt1(){
-        //q1.checkChange();
-    }
-
-    void initQuadratureInterrupt(){
-        //attachInterrupt(digitalPinToInterrupt(q0.clk), quadratureInterrupt0, CHANGE);
-        //attachInterrupt(digitalPinToInterrupt(q1.clk), quadratureInterrupt1, CHANGE);
-    }
-
-    void setRotary0(IRotary *rot){
-        q0.rot = rot;
-    }
-
-    void setRotary1(IRotary *rot){
-        q1.rot = rot;
-    }
-*/
 }
 
 
