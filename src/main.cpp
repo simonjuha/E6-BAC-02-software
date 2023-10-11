@@ -7,6 +7,7 @@
 #include "rotaryEncoderDriver/quardratureDriver.hpp"
 #include "booleanDriver/gpioDriver.hpp"
 #include "displayDriver/displayDriver.hpp"
+#include "cvDriver/adcDriver.hpp"
 
  
 
@@ -84,7 +85,9 @@ void setup()
         q1.attach(&t1);
         q1.attach(&t2);
         
- 
+
+        adcDriver adc(ADC1_CHANNEL_7);
+        int lastRead = 0;
 
         while(1){
             vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -106,6 +109,11 @@ void setup()
             }
             t1.tick();
             t2.tick();
+            if(lastRead > adc.read() + 10 || lastRead < adc.read() - 10){
+                display.writeLine("adc: " + String(adc.read()));
+                lastRead = adc.read();
+            }
+
         }
     }, "rotary", 10000, NULL, 1, NULL);
     
