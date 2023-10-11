@@ -6,7 +6,7 @@
 
 
 namespace Quad{
-     class Quardrature{
+     class Quardrature : public RotarySubject{
         public:
         // pass function pointer (one argument is Quardrature pointer)
             Quardrature(int clk, int dt){
@@ -39,17 +39,14 @@ namespace Quad{
                 clkNewState = gpio_get_level(_clk);
                 if(clkNewState != clkLastState){
                     if(clkNewState == gpio_get_level(_dt)){
-                        rot->up();
+                        Up();
                     }
                     else
                     {
-                        rot->down();
+                        Down();
                     }
                     clkLastState = clkNewState;
                 }
-            }
-            void setRotary(IRotary *rot){
-                this->rot = rot;
             }
             static void ISR_clk(void* arg){
                 if(arg){ // if arg is not null
@@ -58,8 +55,7 @@ namespace Quad{
 
                 }
             }
-
-            IRotary *rot; // pointer to rotary object
+        private:
             gpio_num_t _clk;
             gpio_num_t _dt;
             bool clkLastState = false;

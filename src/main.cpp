@@ -11,7 +11,7 @@
 
 
 
-class testReciver : public IRotary, public IEdgeObserver{
+class testReciver : public IRotaryObserver, public IEdgeObserver{
     public:
         void up(){
             upFlag = true;
@@ -57,7 +57,7 @@ void setup()
         testReciver t;
         Quad::Quardrature q0(QUADRATURE0_CLK, QUADRATURE0_DT);
         //Quad::initQuadratureInterrupt();
-        q0.setRotary(&t);
+        q0.attach(&t);
         while(1){
             vTaskDelay(10 / portTICK_PERIOD_MS);
             t.tick();
