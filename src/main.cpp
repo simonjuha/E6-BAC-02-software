@@ -59,9 +59,8 @@ void setup()
         //Quad::initQuadratureInterrupt();
         q0.setRotary(&t);
         while(1){
-            t.tick();
             vTaskDelay(10 / portTICK_PERIOD_MS);
-            q0.print();
+            t.tick();
         }
     }, "rotary", 10000, NULL, 1, NULL);
     
