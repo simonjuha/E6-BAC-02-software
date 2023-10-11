@@ -52,15 +52,16 @@ class testReciver : public IRotary, public IEdgeObserver{
 void setup() 
 {
     Serial.begin(115200);
-    
+     gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
     xTaskCreate([](void *pvParameters){
         testReciver t;
-        Quad::initQuadratureInterrupt();
-        Quad::q0.setRotary(&t);
+        Quad::Quardrature q0(QUADRATURE0_CLK, QUADRATURE0_DT);
+        //Quad::initQuadratureInterrupt();
+        q0.setRotary(&t);
         while(1){
             t.tick();
             vTaskDelay(10 / portTICK_PERIOD_MS);
-            Quad::q0.print();
+            q0.print();
         }
     }, "rotary", 10000, NULL, 1, NULL);
     
