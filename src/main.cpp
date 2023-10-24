@@ -10,8 +10,8 @@
 #include "displayDriver/displayDriver.hpp"
 #include "cvDriver/adcDriver.hpp"
 #include "ledDriver/ledDriver.hpp"
-#include "sdCardDriver/sdCardDriver.hpp"
 */
+#include "sdCardDriver/sdCardDriver.hpp"
 
 #include "Arduino.h"
 #include <SPI.h>
@@ -22,7 +22,8 @@
 #define MISO 12
 #define SCK  13
 
-SPIClass *hspi;
+
+SdCardDriver sdCardDriver;
 
 void setup() {
 
@@ -36,12 +37,14 @@ void setup() {
     Serial.print("SS: ");
     Serial.println(SS); 
 
-    pinMode(SS, OUTPUT);
-    pinMode(MISO, INPUT);
+
+
+    //pinMode(SS, OUTPUT);
+    //pinMode(MISO, INPUT);
 
     // initialize SPI
-    hspi  = new SPIClass(0);
-    hspi->begin(SCK, MISO, MOSI, SS);
+    //hspi  = new SPIClass(0);
+    //hspi->begin(SCK, MISO, MOSI, SS);
     
 }
 
@@ -72,7 +75,7 @@ void loop() {
     */
 
     // SD CARD COMMMUNICATION (SD.h)
-    
+    /*
         if (!SD.begin(SS, *hspi)) {
             Serial.println("Card Mount Failed");
             return;
@@ -81,10 +84,11 @@ void loop() {
             // print file names
             File root = SD.open("/");
             File file = root.openNextFile();
+            
             while(file){
                 Serial.println(file.name());
                 file = root.openNextFile();
             }
         }
-
+    */
 }
