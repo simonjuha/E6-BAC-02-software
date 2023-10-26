@@ -52,33 +52,48 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
     }
 
     int getSampleByName(std::string fileName, Sample *sample){
-        File file = SD.open(("/"+fileName).c_str());
-        static uint8_t headSize = 44;
+        File file = SD.open(("/"+fileName).c_str());    // open wav file
+        static uint8_t headSize = 44;                   // wav header size in bytes
         if(!file){
             ESP_LOGE("SD", "File not found");
             return -1;
         }
         ESP_LOGI("SD", "File found");
-        // write data to sample buffer
-        sample->size = (file.size() - headSize) / sizeof(int16_t); // subtract header size and divide by 2 (16 bit)
-        delete[] sample->buffer; // deallocate old buffer
-        sample->buffer = new int16_t[sample->size];
+        
+        // CALCULATE SAMPLE SIZE
+        int sampleSize = getSampleSize(&file);                                      // get sample size in 16 bit bytes
+        int zeroPadding = file.size() - headSize - (sampleSize * sizeof(int16_t));  // zero padding in 8bit bytes preceeding sample data
+        sample->size = sampleSize;                                                  // subtract header size and divide by 2 (16 bit)
+        delete[] sample->buffer;                                                    // deallocate old buffer
+        sample->buffer = new int16_t[sample->size];                                 // allocate new buffer
 
-        // skip first 44 bytes (header)
-        file.seek(44);
-
-        // read data
-        for(int i = 0; i < sample->size; i++){
+        // GET WAV DATA BLOCK
+        file.seek(headSize + 1 + zeroPadding);    // skip first 44 bytes (header) and skip zero padding
+        for(int i = 0; i < sample->size; i++) // read data (wav file)
+        {
             uint8_t lsb = file.read();
             uint8_t msb = file.read();
             sample->buffer[i] = static_cast<int16_t>((msb << 8) | lsb); // combine msb and lsb into 16 bit byte
         }
-
         file.close();
-
         return 0;
     }
 
     private:
     SPIClass *_hspi;
+    int getSampleSize(File* file){
+        // get sample_count from head (line 9)
+        // skip first 8 lines (\n)
+        for(int i = 0; i < 8; i++){
+            file->readStringUntil('\n');
+        }
+        // if next bytes form "sample_count -i " then read the number
+        if(file->findUntil("sample_count -i ", "\n")){
+            int sample_count = file->parseInt();
+            ESP_LOGV("SD", "sample_count found: %d", sample_count);
+            return sample_count;
+        }
+        ESP_LOGE("SD", "sample_count not found");
+        return -1;
+    }
 };
