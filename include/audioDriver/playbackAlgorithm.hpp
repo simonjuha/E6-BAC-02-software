@@ -22,3 +22,17 @@ class forwardAlgorithm : public playbackAlgorithm
     }
 
 };
+
+class backwardAlgorithm : public playbackAlgorithm
+{
+    public:
+    void play(Sample *sample, SPIClass *vspi)
+    {
+        static int currentPosition = sample->size;
+        vspi->transfer(sample->buffer[currentPosition]);
+        if(currentPosition-- < 0){
+            currentPosition = sample->size;
+        }
+    }
+
+};

@@ -29,7 +29,6 @@ class AudioDriver {
 
     void setSampleSlot(int slot, Sample * sample){
         this->sampleSlot[slot] = sample;
-        this->currentPosition[slot] = 0;
         this->algorithms[slot] = new forwardAlgorithm();
     }
 
@@ -50,7 +49,5 @@ class AudioDriver {
     private:
     SPIClass *vspi;
     Sample * sampleSlot[NUM_OF_SAMPLES]; // 4 samples to be played
-    int currentPosition[NUM_OF_SAMPLES]; // current position in the sample
     playbackAlgorithm * algorithms[NUM_OF_SAMPLES];
-
 };
