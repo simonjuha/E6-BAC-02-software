@@ -69,7 +69,7 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
 
         // GET WAV DATA BLOCK
         file.seek(headSize + 1 + zeroPadding);    // skip first 44 bytes (header) and skip zero padding
-        for(int i = 0; i < sample->size; i++) // read data (wav file)
+        for(int i = 0; i <= sample->size; i++) // read data (wav file)
         {
             uint8_t lsb = file.read();
             uint8_t msb = file.read();
