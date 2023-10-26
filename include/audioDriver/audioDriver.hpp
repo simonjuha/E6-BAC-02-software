@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "sdCardDriver/sample.hpp"
+#include "audioDriver/playbackAlgorithm.hpp"
 #include <SPI.h>
 #include <vector>
 
@@ -29,6 +30,7 @@ class AudioDriver {
     void setSampleSlot(int slot, Sample * sample){
         this->sampleSlot[slot] = sample;
         this->currentPosition[slot] = 0;
+        this->algorithms[slot] = new forwardAlgorithm();
     }
 
     // doesn't work in loop() ?
@@ -38,18 +40,9 @@ class AudioDriver {
 
         if(currentTime - lastSampleTime >= SAMPLE_INTERVAL){
             digitalWrite(AUDIO_SPI_LR, HIGH);
-            vspi->transfer(sampleSlot[0]->buffer[currentPosition[0]]);
+            algorithms[0]->process(sampleSlot[0], vspi);
             digitalWrite(AUDIO_SPI_LR, LOW);
-            vspi->transfer(sampleSlot[1]->buffer[currentPosition[1]]);
-            
-            if(currentPosition[0]++ > this->sampleSlot[0]->size){
-                this->currentPosition[0] = 0;
-            }
-
-            if(currentPosition[1]++ > this->sampleSlot[1]->size){
-                this->currentPosition[1] = 0;
-            }
-
+            algorithms[1]->process(sampleSlot[1], vspi);
             lastSampleTime = currentTime;
         }
     }
@@ -58,5 +51,6 @@ class AudioDriver {
     SPIClass *vspi;
     Sample * sampleSlot[NUM_OF_SAMPLES]; // 4 samples to be played
     int currentPosition[NUM_OF_SAMPLES]; // current position in the sample
+    playbackAlgorithm * algorithms[NUM_OF_SAMPLES];
 
 };
