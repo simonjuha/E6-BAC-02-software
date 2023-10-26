@@ -40,9 +40,9 @@ class AudioDriver {
 
         if(currentTime - lastSampleTime >= SAMPLE_INTERVAL){
             digitalWrite(AUDIO_SPI_LR, HIGH);
-            algorithms[0]->process(sampleSlot[0], vspi);
+            algorithms[0]->play(sampleSlot[0], vspi);
             digitalWrite(AUDIO_SPI_LR, LOW);
-            algorithms[1]->process(sampleSlot[1], vspi);
+            algorithms[1]->play(sampleSlot[1], vspi);
             lastSampleTime = currentTime;
         }
     }

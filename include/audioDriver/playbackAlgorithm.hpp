@@ -6,13 +6,13 @@
 class playbackAlgorithm
 {
     public:
-    virtual void process(Sample *sample, SPIClass *vspi) = 0;
+    virtual void play(Sample *sample, SPIClass *vspi) = 0;
 };
 
 class forwardAlgorithm : public playbackAlgorithm
 {
     public:
-    void process(Sample *sample, SPIClass *vspi)
+    void play(Sample *sample, SPIClass *vspi)
     {
         static int currentPosition = 0;
         vspi->transfer(sample->buffer[currentPosition]);
