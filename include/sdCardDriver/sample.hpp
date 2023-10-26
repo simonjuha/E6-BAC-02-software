@@ -1,3 +1,6 @@
+#ifndef SAMPLE_HPP
+#define SAMPLE_HPP
+
 #include <cstdint> // int16_t
 #include <cstddef> // size_t
 
@@ -25,3 +28,5 @@ struct Sample{
     size_t size;
     // sample name?
 };
+
+#endif // SAMPLE_HPP
