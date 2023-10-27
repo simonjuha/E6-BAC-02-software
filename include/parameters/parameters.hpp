@@ -12,6 +12,14 @@ class Parameter {
 
     }
 
+    // using shared pointer
+    Parameter(std::string name, const std::shared_ptr<std::vector<std::string>>& optionsPtr)
+    : _name(name), _optionsPtr(optionsPtr), _maxVal(optionsPtr->size() - 1), _minVal(0), _stepSize(1), _value(0)
+    {
+
+    }
+
+    // using internal string vector
     Parameter(std::string name, std::vector<std::string> options)
     : _name(name), _options(options), _maxVal(options.size() - 1), _minVal(0), _stepSize(1), _value(0)
     {
@@ -35,15 +43,15 @@ class Parameter {
     }
 
     T value(){
-        if(_options.has_value()){                   // if _options is set
-            //return _options.value()[(_value];    // return the string at index
-        }
-        return _value;                              // else return the numeric value
+        return _value;                              
     }
 
     std::string label(){
-        if (_options.has_value()){                  // if _options is set
-            return _options.value()[(int)_value];    // return the string at index
+        if (_optionsPtr.has_value()){                  // if _options is set
+            return (*_optionsPtr.value())[_value];                 // return the string value from the vector (using the numeric value as index
+        }
+        if(_options.has_value()){
+            return _options.value()[_value];
         }
         return std::to_string(_value);              // else return the numeric value
     }
@@ -54,9 +62,11 @@ class Parameter {
 
     private:
     std::string _name;
+    std::string *_namePtr;
+    std::optional< std::shared_ptr< std::vector<std::string> > > _optionsPtr;
+    std::optional< std::vector<std::string> > _options;
     T _value;
     T _maxVal;
     T _minVal;
     T _stepSize;
-    std::optional< std::vector<std::string> > _options;
 };
