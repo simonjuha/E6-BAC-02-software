@@ -1,3 +1,6 @@
+#ifndef PARAMETERS_HPP
+#define PARAMETERS_HPP
+
 #include <string>
 #include <vector>
 #include <optional>
@@ -70,3 +73,5 @@ class Parameter {
     T _minVal;
     T _stepSize;
 };
+
+#endif //PARAMETERS_HPP
