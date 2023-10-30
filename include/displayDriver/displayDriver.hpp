@@ -9,14 +9,21 @@
 
 class DisplayDriver {
     public:
-    DisplayDriver(){
-        Wire.begin(SSD1306_SDA_PIN, SSD1306_SCL_PIN);
+    DisplayDriver(){}
+    void init(){
+        if(Wire.begin(SSD1306_SDA_PIN, SSD1306_SCL_PIN)){
+            ESP_LOGI("DisplayDriver", "Wire.begin() succeeded");
+        }else{
+            ESP_LOGE("DisplayDriver", "Wire.begin() failed");
+        }
         _display = Adafruit_SSD1306(SSD1306_SCREEN_WIDTH, SSD1306_SCREEN_HEIGHT, &Wire, -1);
         _display.begin(SSD1306_SWITCHCAPVCC, SSD1306_ADDRESS);
         _display.setTextColor(WHITE);
         _display.setTextSize(1);
+        _display.setRotation(2);
         _display.clearDisplay();
     }
+
     void writeLine(String inputText){
         static int line = 0;
         _display.setCursor(0,line);
