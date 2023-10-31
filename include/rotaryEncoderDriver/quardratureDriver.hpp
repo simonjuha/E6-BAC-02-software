@@ -6,10 +6,10 @@
 
 
 namespace Quad{
-     class Quardrature : public RotarySubject{
+     class Quadrature : public RotarySubject{
         public:
         // pass function pointer (one argument is Quardrature pointer)
-            Quardrature(int clk, int dt){
+            Quadrature(int clk, int dt){
                 _clk = static_cast<gpio_num_t>(clk);
                 _dt = static_cast<gpio_num_t>(dt);
 
@@ -50,7 +50,7 @@ namespace Quad{
             }
             static void ISR_clk(void* arg){
                 if(arg){ // if arg is not null
-                    Quardrature *instance = static_cast<Quardrature*>(arg); // get this instance.
+                    Quadrature *instance = static_cast<Quadrature*>(arg); // get this instance.
                     instance->checkChange();
 
                 }
