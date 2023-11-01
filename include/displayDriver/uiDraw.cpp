@@ -9,4 +9,8 @@ void DefaultDrawVisitor::visit(IntParameter * element){
     Serial.println(element->value().c_str());
 }
 
+void DefaultDrawVisitor::visit(OptionParameter * element){
+    Serial.println((element->name() + " : " + element->value() ).c_str());
+}
+
 
