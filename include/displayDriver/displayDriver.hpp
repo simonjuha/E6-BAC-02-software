@@ -25,7 +25,6 @@ class DisplayDriver {
     }
 
     void writeLine(String inputText){
-        static int line = 0;
         _display.setCursor(0,line);
         _display.println(inputText);
         _display.display();
@@ -35,7 +34,14 @@ class DisplayDriver {
             _display.clearDisplay();
         }
     }
+
+    void clear(){
+        _display.clearDisplay();
+        line = 0;
+        _display.setCursor(0,0);
+    }
     private:
+    int line = 0;
     Adafruit_SSD1306 _display;
 };
 

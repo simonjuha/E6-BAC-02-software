@@ -3,92 +3,119 @@
 */
 /*
 #include <Arduino.h>
-#include <RTOS.h>
 
-#include "rotaryEncoderDriver/quardratureDriver.hpp"
 #include "booleanDriver/gpioDriver.hpp"
-#include "displayDriver/displayDriver.hpp"
 #include "cvDriver/adcDriver.hpp"
 #include "ledDriver/ledDriver.hpp"
+#include "Arduino.h"
+#include <string>
 */
+#include <RTOS.h>
+#include <string>
+#include "rotaryEncoderDriver/quardratureDriver.hpp"
+#include "menuStructure/parameters.hpp"
+#include "audioDriver/audioDriver.hpp"
 #include "sdCardDriver/sdCardDriver.hpp"
 
-#include "Arduino.h"
-#include <SPI.h>
-#include <SD.h>
+#include "displayDriver/displayDriver.hpp"
+#include "displayDriver/uiDraw.hpp"
 
-#define SS   10
-#define MOSI 11
-#define MISO 12
-#define SCK  13
+//#include <esp32-hal-spi.h>
+//#include <esp32-hal-gpio.h>
+//#include <driver/spi_master.h>
 
 
 SdCardDriver sdCardDriver;
+AudioDriver audioDriver;
+DisplayDriver displayDriver;
+    Sample chirpSample, toneSample;
+
+class RotaryObserver : public IRotaryObserver {
+    public:
+        void up(){
+            value++;
+            changed = true;
+        }
+        void down(){
+            value--;
+            changed = true;
+        }
+        void tick(){
+            if (changed)
+            {
+                displayDriver.clear();
+                displayDriver.writeLine(std::to_string(value).c_str());
+                changed = false;
+            }
+        }
+    private:
+    int value = 0;
+    bool changed = false;
+};
+
+void task1(void * parameter){
+    RotaryObserver rotaryObserver;
+    RotaryObserver rotaryObserver2;
+    Quadrature rotarySubject(2, 1);
+    Quadrature rotarySubject2(35, 36);
+    rotarySubject.attach(&rotaryObserver);
+    rotarySubject2.attach(&rotaryObserver2);
+
+
+
+    
+    while (true)
+    {
+        rotaryObserver.tick();
+        rotaryObserver2.tick();
+        // RTOS delay
+        vTaskDelay(10 / portTICK_PERIOD_MS); // allows for some time for other tasks to run
+    }
+}
+
+void task2(void * parameter){
+    Sample chirpSample, toneSample;
+    sdCardDriver.getSampleByName("sweep.wav",&chirpSample);
+    sdCardDriver.getSampleByName("tone.wav",&toneSample);
+    audioDriver.setSampleSlot(0, &chirpSample);
+    audioDriver.setSampleSlot(1, &toneSample);
+    while(true){
+        audioDriver.tick();
+    }
+}
+
+
 
 void setup() {
-
     Serial.begin(115200);
-    Serial.print("MOSI: ");
-    Serial.println(MOSI);
-    Serial.print("MISO: ");
-    Serial.println(MISO);
-    Serial.print("SCK: ");
-    Serial.println(SCK);
-    Serial.print("SS: ");
-    Serial.println(SS); 
+    IntParameter intParameter("test", 0, 100, 50);
+    intParameter.accept(new DefaultDrawVisitor());
+    intParameter.increment();
+    intParameter.accept(new DefaultDrawVisitor());
+
+    OptionParameter optionParameter("test", {"option1", "option2", "option3"}, 0);
+    optionParameter.accept(new DefaultDrawVisitor());
+    optionParameter.increment();
+    optionParameter.accept(new DefaultDrawVisitor());
+    optionParameter.increment();
+    optionParameter.accept(new DefaultDrawVisitor());
+
+
+    while (true)
+    {
+        /* code */
+    }
+
+
+    displayDriver.init();
 
 
 
-    //pinMode(SS, OUTPUT);
-    //pinMode(MISO, INPUT);
-
-    // initialize SPI
-    //hspi  = new SPIClass(0);
-    //hspi->begin(SCK, MISO, MOSI, SS);
-    
+    // setup RTOS tasks
+   xTaskCreatePinnedToCore(task1, "Task1", 10000, NULL, 1, NULL, 0);
+   xTaskCreatePinnedToCore(task2, "Task2", 10000, NULL, 1, NULL, 1);
 }
 
 void loop() {
-
     delay(1000);
-    // WORKING SPI COMMUNICATION
-    /*
-        hspi->beginTransaction(SPISettings(100000, MSBFIRST, SPI_MODE0));
-        digitalWrite(SS, LOW);
-        // send CMD0
-        hspi->transfer(0x40);
-        hspi->transfer(0x00);
-        hspi->transfer(0x00);
-        hspi->transfer(0x00);
-        hspi->transfer(0x00);
-        hspi->transfer(0x95);
-        // receive R1
-        uint8_t r1 = hspi->transfer(0xFF);
-        uint8_t r2 = hspi->transfer(0xFF);
-        digitalWrite(SS, HIGH);
-        hspi->endTransaction();
-
-        Serial.print("R1: ");
-        Serial.println(r1, HEX);
-        Serial.print("R2: ");
-        Serial.println(r2, HEX);
-    */
-
-    // SD CARD COMMMUNICATION (SD.h)
-    /*
-        if (!SD.begin(SS, *hspi)) {
-            Serial.println("Card Mount Failed");
-            return;
-        }else{
-            Serial.println("Card Mount Success");
-            // print file names
-            File root = SD.open("/");
-            File file = root.openNextFile();
-            
-            while(file){
-                Serial.println(file.name());
-                file = root.openNextFile();
-            }
-        }
-    */
 }
