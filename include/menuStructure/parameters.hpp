@@ -11,18 +11,18 @@ class IDrawElement {
     virtual void accept(IDrawVisitor* visitor) = 0;
 };
 
-class IParameterControl{
+class IParameterControl : public IDrawElement{
     public:
     virtual void increment() = 0;
     virtual void decrement() = 0;
     virtual void reset() = 0;
     virtual std::string name() = 0;
     virtual std::string value() = 0;
+    virtual void accept(IDrawVisitor* visitor) = 0;
 };
 
 
-class IntParameter :    public IDrawElement, 
-                        public IParameterControl, 
+class IntParameter :    public IParameterControl, 
                         public DataUpdateSubject
 {
     public:
@@ -47,8 +47,7 @@ class IntParameter :    public IDrawElement,
 };
 
 // parameters for selection options (enum of strings)
-class OptionParameter : public IDrawElement, 
-                        public IParameterControl,
+class OptionParameter : public IParameterControl,
                         public DataUpdateSubject
 {
     public:
@@ -70,8 +69,7 @@ class OptionParameter : public IDrawElement,
         std::string _name;
 };
 
-class FloatParameter : public IDrawElement, 
-                        public IParameterControl,
+class FloatParameter :  public IParameterControl,
                         public DataUpdateSubject
 {
     public:
