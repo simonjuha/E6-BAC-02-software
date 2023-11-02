@@ -89,16 +89,15 @@ void task2(void * parameter){
 void setup() {
     Serial.begin(115200);
     IntParameter intParameter("test", 0, 100, 50);
-    intParameter.accept(new DefaultDrawVisitor());
+    ConcreteTestObserver concreteTestObserver;
+    DefaultDrawVisitor defaultDrawVisitor;
+    intParameter.attach("test", &concreteTestObserver);
     intParameter.increment();
-    intParameter.accept(new DefaultDrawVisitor());
+    intParameter.reset();
+    intParameter.decrement();
+    intParameter.accept(&defaultDrawVisitor);
 
-    OptionParameter optionParameter("test", {"option1", "option2", "option3"}, 0);
-    optionParameter.accept(new DefaultDrawVisitor());
-    optionParameter.increment();
-    optionParameter.accept(new DefaultDrawVisitor());
-    optionParameter.increment();
-    optionParameter.accept(new DefaultDrawVisitor());
+    
 
 
     while (true)
