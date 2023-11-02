@@ -3,17 +3,18 @@
 
 #include "displayDriver/uiDraw.hpp"
 #include "menuStructure/parameters.hpp"
+#include "displayDriver/displayDriver.hpp"
 
 void DefaultDrawVisitor::visit(IntParameter * element){
-    Serial.println((element->name() + " : " + element->value() ).c_str());
+    DisplayDriver::getInstance().writeLine((element->name() + " :visit: " + element->value() ).c_str());
 }
 
 void DefaultDrawVisitor::visit(OptionParameter * element){
-    Serial.println((element->name() + " : " + element->value() ).c_str());
+    DisplayDriver::getInstance().writeLine((element->name() + " :visit: " + element->value() ).c_str());
 }
 
 void DefaultDrawVisitor::visit(FloatParameter * element){
-    Serial.println((element->name() + " : " + element->value() ).c_str());
+    DisplayDriver::getInstance().writeLine((element->name() + " :visit: " + element->value() ).c_str());
 }
 
 

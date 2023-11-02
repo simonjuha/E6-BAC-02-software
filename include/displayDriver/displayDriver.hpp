@@ -1,3 +1,4 @@
+#pragma once
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 
@@ -7,9 +8,14 @@
 #define SSD1306_SDA_PIN 20
 #define SSD1306_SCL_PIN 19
 
+// singleton
 class DisplayDriver {
     public:
-    DisplayDriver(){}
+    static DisplayDriver& getInstance(){
+        static DisplayDriver instance;
+        return instance;
+    }
+
     void init(){
         if(Wire.begin(SSD1306_SDA_PIN, SSD1306_SCL_PIN)){
             ESP_LOGI("DisplayDriver", "Wire.begin() succeeded");
@@ -41,6 +47,9 @@ class DisplayDriver {
         _display.setCursor(0,0);
     }
     private:
+    DisplayDriver(){}
+    DisplayDriver(DisplayDriver const&) = delete;
+    DisplayDriver& operator=(DisplayDriver const&) = delete;
     int line = 0;
     Adafruit_SSD1306 _display;
 };
