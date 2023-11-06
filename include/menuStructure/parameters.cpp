@@ -94,11 +94,12 @@ void OptionParameter::reset(){
 
 /* FLOAT PARAMETER */
 
-FloatParameter::FloatParameter(std::string name, float min, float max, float defaultValue){
+FloatParameter::FloatParameter(std::string name, float min, float max, float defaultValue, float increment){
     _name = name;
     _min = min;
     _max = max;
     _value = defaultValue;
+    _increment = increment;
     _defaultValue = defaultValue;
 }
 
@@ -111,13 +112,16 @@ std::string FloatParameter::name(){
 }
 
 std::string FloatParameter::value(){
-    return std::to_string(_value);
+    // use two decimal places
+    char buffer[10];
+    dtostrf(_value, 4, 2, buffer);
+    return std::string(buffer);
 }
 
 void FloatParameter::increment(){
     if (_value < _max)
     {
-        _value++;
+        _value += _increment;
         update(_name, _value);
     }
 }
@@ -125,7 +129,7 @@ void FloatParameter::increment(){
 void FloatParameter::decrement(){
     if (_value > _min)
     {
-        _value--;
+        _value -= _increment;
         update(_name, _value);
     }
 }

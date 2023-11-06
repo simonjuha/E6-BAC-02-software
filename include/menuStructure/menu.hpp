@@ -7,80 +7,52 @@
 #include "displayDriver/displayDriver.hpp"
 
 
-class IDisplayable {
-    public:
-        virtual std::string string() = 0;
-};
-
-class StaticTextUI : public IDisplayable {
-    public:
-        StaticTextUI(std::string text){
-            _text = text;
-        }
-        std::string string(){
-            return _text;
-        }
-        
-    private:
-        std::string _text;
-};
-
-class ParameterUI : public IDisplayable {
-    public:
-        ParameterUI(std::shared_ptr<IParameterControl> parameter){
-            _parameter = parameter;
-        }
-        std::string string(){
-            return _parameter->name() + ": " + _parameter->value();
-        }
-
-    private:
-        std::shared_ptr<IParameterControl> _parameter;
-        bool _isSelected = false;
-};
-
 class MenuUI {
     public:
-        void addUIElement(std::shared_ptr<IDisplayable> displayable){
-            _displayables.push_back(displayable);
+        void addUIElement(std::shared_ptr<IParameterControl> displayable){
+            _parameters.push_back(displayable);
         }
-        std::shared_ptr<IDisplayable> getSelected(){
-            return _displayables[_index];
+        std::shared_ptr<IParameterControl> getSelected(){
+            return _selected;
         }
         void refresh(){
             _lines.clear();
-            for (auto displayable : _displayables)
-            {
-                _lines.push_back(displayable->string());
+            for(int i = 0; i < _parameters.size(); i++){
+                _lines.push_back(getParameterString(_parameters[i]));
             }
             DisplayDriver::getInstance().setLines(_lines);
-            DisplayDriver::getInstance().select(_index);
+            DisplayDriver::getInstance().select(_selectedIndex);
         }
 
         int size(){
-            return _displayables.size()-1;
+            return _parameters.size()-1;
         }
 
         void next(){
-            if(_index < size()){
-                _index++;
+            if(_selectedIndex < size()){
+                _selectedIndex++;
             }else{
-                _index = 0;
+                _selectedIndex = 0;
             }
-            DisplayDriver::getInstance().select(_index);
+            DisplayDriver::getInstance().select(_selectedIndex);
+            _selected = _parameters[_selectedIndex];
         }
         void previous(){
-            if(_index > 0){
-                _index--;
+            if(_selectedIndex > 0){
+                _selectedIndex--;
             }else{
-                _index = size();
+                _selectedIndex = size();
             }
-            DisplayDriver::getInstance().select(_index);
+            DisplayDriver::getInstance().select(_selectedIndex);
+            _selected = _parameters[_selectedIndex];
         }
     private:
-    std::vector<std::shared_ptr<IDisplayable>> _displayables;
-    std::shared_ptr<IDisplayable> _selected;
+    std::string getParameterString(std::shared_ptr<IParameterControl> parameter){
+        return parameter->name() + " : " + parameter->value();
+    }
+    std::vector<std::shared_ptr<IParameterControl>> _parameters;
+    std::shared_ptr<IParameterControl> _selected;
     std::vector<std::string> _lines;
-    int _index = 0;
+    int _selectedIndex = 0;
 
 };

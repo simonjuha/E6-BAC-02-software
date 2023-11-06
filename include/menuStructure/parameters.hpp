@@ -73,7 +73,7 @@ class FloatParameter :  public IParameterControl,
                         public DataUpdateSubject
 {
     public:
-        FloatParameter(std::string name = "unknown", float min = 0, float max = 100, float defaultValue = 0);
+        FloatParameter(std::string name = "unknown", float min = 0, float max = 100, float defaultValue = 0, float increment = 0.01);
         // IDrawElement
         void accept(IDrawVisitor* visitor) override;
         // IParameterString
@@ -88,6 +88,7 @@ class FloatParameter :  public IParameterControl,
         float _value;
         float _min;
         float _max;
+        float _increment;
         std::string _name;
 };
 
