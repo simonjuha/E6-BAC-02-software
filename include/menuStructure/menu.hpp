@@ -4,10 +4,12 @@
 #include <Arduino.h>
 #include "menuStructure/parameters.hpp"
 #include "displayDriver/uiDraw.hpp"
+#include "displayDriver/displayDriver.hpp"
+
 
 class IDisplayable {
     public:
-        virtual void display() = 0;
+        virtual std::string string() = 0;
 };
 
 class StaticTextUI : public IDisplayable {
@@ -15,9 +17,10 @@ class StaticTextUI : public IDisplayable {
         StaticTextUI(std::string text){
             _text = text;
         }
-        void display(){
-            Serial.println(_text.c_str());
+        std::string string(){
+            return _text;
         }
+        
     private:
         std::string _text;
 };
@@ -27,12 +30,13 @@ class ParameterUI : public IDisplayable {
         ParameterUI(std::shared_ptr<IParameterControl> parameter){
             _parameter = parameter;
         }
-        void display(){
-            Serial.println(_parameter->name().c_str());
-            Serial.println(_parameter->value().c_str());
+        std::string string(){
+            return _parameter->name() + ": " + _parameter->value();
         }
+
     private:
         std::shared_ptr<IParameterControl> _parameter;
+        bool _isSelected = false;
 };
 
 class MenuUI {
@@ -40,12 +44,43 @@ class MenuUI {
         void addUIElement(std::shared_ptr<IDisplayable> displayable){
             _displayables.push_back(displayable);
         }
-        void display(){
+        std::shared_ptr<IDisplayable> getSelected(){
+            return _displayables[_index];
+        }
+        void refresh(){
+            _lines.clear();
             for (auto displayable : _displayables)
             {
-                displayable->display();
+                _lines.push_back(displayable->string());
             }
+            DisplayDriver::getInstance().setLines(_lines);
+            DisplayDriver::getInstance().select(_index);
+        }
+
+        int size(){
+            return _displayables.size()-1;
+        }
+
+        void next(){
+            if(_index < size()){
+                _index++;
+            }else{
+                _index = 0;
+            }
+            DisplayDriver::getInstance().select(_index);
+        }
+        void previous(){
+            if(_index > 0){
+                _index--;
+            }else{
+                _index = size();
+            }
+            DisplayDriver::getInstance().select(_index);
         }
     private:
     std::vector<std::shared_ptr<IDisplayable>> _displayables;
+    std::shared_ptr<IDisplayable> _selected;
+    std::vector<std::string> _lines;
+    int _index = 0;
+
 };

@@ -1,0 +1,1 @@
+having issues: see what can be cut to get progrss (display driver cut submenus and text display)

@@ -39,20 +39,21 @@ class DisplayDriver{
 
     void writeFixedLines(std::vector<std::string> lines, int selectedLine){
         //static std::vector<std::string> oldLines;
-  
+
         for(int i=0; i < _maxLines; i++){
-
+            std::string lineToPrint;
             if(selectedLine == i){
-            _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,WHITE);
-            _display.setTextColor(BLACK);
-
+                _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,WHITE);
+                _display.setTextColor(BLACK);
+                lineToPrint = ">" + lines[i];
             }
             else{
                 _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,BLACK);
                 _display.setTextColor(WHITE);
+                lineToPrint = " " + lines[i];
             }
             _display.setCursor(0, i*_lineHeight);
-            _display.println(lines[i].c_str());
+            _display.println(lineToPrint.c_str());
             //oldLines[i] = lines[i];
         }
 
@@ -80,6 +81,7 @@ class DisplayDriver{
         _lines = lines;
         _selectedLine = 0;
         refreshPositions();
+        writeRelativeLines();
     }
     
     void clear(){

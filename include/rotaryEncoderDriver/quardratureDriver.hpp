@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include "rotaryEncoderDriver/IRotary.hpp"
 
-
 class Quadrature : public RotarySubject{
 public:
 // pass function pointer (one argument is Quardrature pointer)
+    Quadrature(){}
     Quadrature(int clk, int dt){
         _clk = static_cast<gpio_num_t>(clk);
         _dt = static_cast<gpio_num_t>(dt);
