@@ -5,6 +5,26 @@ class IRotaryObserver {
     public:
         virtual void up() = 0;
         virtual void down() = 0;
+        void tick(){
+            if(upTick){
+                upTick = false;
+                up();
+            }
+            if(downTick){
+                downTick = false;
+                down();
+            }
+        }
+        // reserved for use with interrupts
+        void interruptUp(){
+            upTick = true;
+        }
+        void interruptDown(){
+            downTick = true;
+        }
+    private:
+        bool upTick = false;
+        bool downTick = false;
 };
 
 // RotarySubject class
@@ -24,13 +44,13 @@ class RotarySubject {
 
         void Up(){
             for(int i = 0; i < observers.size(); i++){
-                observers[i]->up();
+                observers[i]->interruptUp();
             }
         }
 
         void Down(){
             for(int i = 0; i < observers.size(); i++){
-                observers[i]->down();
+                observers[i]->interruptDown();
             }
         }
 
