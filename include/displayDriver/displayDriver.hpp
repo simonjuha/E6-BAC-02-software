@@ -2,6 +2,8 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 #include <vector>
+#include <string>
+#include <algorithm>
 
 #define SSD1306_ADDRESS 0x3C
 #define SSD1306_SCREEN_WIDTH 128
@@ -35,41 +37,90 @@ class DisplayDriver{
         _display.clearDisplay();
     }
 
-    void writeLine(String inputText, bool selected = false){
-        _display.setCursor(0,line);
-        _display.println(inputText);
-        if(selected){
-            _display.setTextColor(BLACK, WHITE); // 'inverted' text
-        }else{
-            _display.setTextColor(WHITE);
+    void writeFixedLines(std::vector<std::string> lines, int selectedLine){
+        //static std::vector<std::string> oldLines;
+  
+        for(int i=0; i < _maxLines; i++){
+
+            if(selectedLine == i){
+            _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,WHITE);
+            _display.setTextColor(BLACK);
+
+            }
+            else{
+                _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,BLACK);
+                _display.setTextColor(WHITE);
+            }
+            _display.setCursor(0, i*_lineHeight);
+            _display.println(lines[i].c_str());
+            //oldLines[i] = lines[i];
         }
+
         _display.display();
-        line += 10;
-        if(line > 60){
-            line = 0;
-            _display.clearDisplay();
-        }
     }
 
-    void rewriteLine(std::string newLine, int lineNum){
-        _display.fillRect(0,lineNum*10,128,10,BLACK);
-        _display.setCursor(0,lineNum*10);
-        _display.println(newLine.c_str());
-        _display.display();
+    void select(int sel){
+        if(sel < 0 || sel > _lines.size()){
+            return;
+        }
+        _selectedLine = sel;
+        refreshPositions();
+        writeRelativeLines();
     }
 
+    void writeRelativeLines(){
+        std::vector<std::string> fixedLines = {
+            _lines.begin() + _scroll,
+            _lines.begin() + _scroll + _maxLines
+        };
+        writeFixedLines(fixedLines, _relativeSelectedLine);
+    }
+
+    void setLines(std::vector<std::string> lines){
+        _lines = lines;
+        _selectedLine = 0;
+        refreshPositions();
+    }
+    
     void clear(){
         _display.clearDisplay();
-        line = 0;
         _display.setCursor(0,0);
     }
 
     private:
+    // recalculate the position based on seleect display height vector length etc.
+    void refreshPositions(){
+    _listLines = _lines.size();
+    if(_selectedLine >= _maxLines) // if selected line is beyond the visible display
+    {
+        _scroll = _selectedLine - _maxLines + 1;
+        _relativeSelectedLine = _maxLines - 1;
+    }
+    else // if selected line is within the visible display
+    {
+        _scroll = 0;
+        _relativeSelectedLine = _selectedLine;
+    }
+
+    // if the scroll is beyond the list length
+    if (_scroll > _listLines - _maxLines) {
+        _scroll = _listLines - _maxLines;
+    }
+
+}
+
     DisplayDriver(){}
     DisplayDriver(DisplayDriver const&) = delete;
     DisplayDriver& operator=(DisplayDriver const&) = delete;
-    int line = 0;
+    int _selectedLine = 0;
+    int _listLines = 0;
+    int _relativeSelectedLine = 0; // 0-5 display select
+    int _scroll = 0;
     const int _maxLines = 6;
+    const int _lineHeight = 10;
+    const int _displayHeight = 64;
+    const int _displayWidth = 128;
+    std::vector<std::string> _lines;
     Adafruit_SSD1306 _display;
 };
 
