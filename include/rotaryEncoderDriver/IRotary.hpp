@@ -10,7 +10,7 @@ class IRotaryObserver {
                 upTick = false;
                 up();
             }
-            if(downTick){
+            else if(downTick){
                 downTick = false;
                 down();
             }

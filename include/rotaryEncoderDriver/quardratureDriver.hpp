@@ -46,6 +46,13 @@ public:
     }
     static void ISR_clk(void* arg){
         if(arg){ // if arg is not null
+            // debounce
+            static double lastTime = 0;
+            double time = millis();
+            if(time - lastTime < 5){
+                return; // ignore interrupt
+            }
+            lastTime = time;
             Quadrature *instance = static_cast<Quadrature*>(arg); // get this instance.
             instance->checkChange();
 
