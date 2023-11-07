@@ -11,10 +11,6 @@
 #define SSD1306_SDA_PIN 20
 #define SSD1306_SCL_PIN 19
 
-
-
-
-
 // singleton
 class DisplayDriver{
     public:
@@ -41,7 +37,7 @@ class DisplayDriver{
         for(int i=0; i < _maxLines; i++){
                 std::string lineToPrint;
                 if(selectedLine == i){
-                    _display.fillRect(0,i*_lineHeight,_displayWidth,_lineHeight,WHITE);
+                    _display.fillRect(0,i*_lineHeight-2,_displayWidth,_lineHeight+1,WHITE);
                     _display.setTextColor(BLACK);
                     lineToPrint = ">" + lines[i];
                 }
