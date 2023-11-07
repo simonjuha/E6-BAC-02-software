@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 
 // IRotary interface
@@ -31,29 +32,29 @@ class IRotaryObserver {
 class RotarySubject {
     public:
         void attach(IRotaryObserver *obs){
-            observers.push_back(obs);
+            _observers.push_back(obs);
         }
 
         void detach(IRotaryObserver *obs){
-            for(int i = 0; i < observers.size(); i++){
-                if(observers[i] == obs){
-                    observers.erase(observers.begin() + i);
+            for(int i = 0; i < _observers.size(); i++){
+                if(_observers[i] == obs){
+                    _observers.erase(_observers.begin() + i);
                 }
             }
         }
 
         void Up(){
-            for(int i = 0; i < observers.size(); i++){
-                observers[i]->interruptUp();
+            for(int i = 0; i < _observers.size(); i++){
+                _observers[i]->interruptUp();
             }
         }
 
         void Down(){
-            for(int i = 0; i < observers.size(); i++){
-                observers[i]->interruptDown();
+            for(int i = 0; i < _observers.size(); i++){
+                _observers[i]->interruptDown();
             }
         }
 
     private:
-    std::vector<IRotaryObserver*> observers;
+    std::vector<IRotaryObserver*> _observers;
 };
