@@ -12,6 +12,9 @@ class MenuUI {
             _parameters.push_back(displayable);
         }
         std::shared_ptr<IParameterControl> getSelected(){
+            if(_selected == nullptr){
+                _selected = _parameters[_selectedIndex];
+            }
             return _selected;
         }
         void refresh(){
