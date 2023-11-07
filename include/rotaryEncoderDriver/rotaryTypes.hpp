@@ -20,8 +20,6 @@ class SelectorRotary : public IRotaryObserver{
     private:
         MenuUI *_menuUI;
         Quadrature _rotary;
-        bool isUp;
-        bool isDown;
 };
 
 // change parameter value
@@ -53,6 +51,4 @@ class ValueRotary : public IRotaryObserver{
         std::shared_ptr<IParameterControl> _parameter;
         Quadrature _rotary;
         MenuUI *_menuUI;
-        bool isUp;
-        bool isDown;
 };

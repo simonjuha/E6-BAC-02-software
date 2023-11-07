@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <memory>
 
 #include <Arduino.h>
 
@@ -10,8 +11,8 @@ class IParameterObserver{
 
 class IParameterSubject{
     public:
-    virtual void attach(const std::string& name, IParameterObserver* observer) = 0;
-    virtual void detach(const std::string& name, IParameterObserver* observer) = 0;
+    virtual void attach(const std::string& name, std::shared_ptr<IParameterObserver> observer) = 0;
+    virtual void detach(const std::string& name, std::shared_ptr<IParameterObserver> observer) = 0;
     virtual void update(const std::string& name, float newValue) = 0;
 };
 
@@ -26,12 +27,12 @@ class ConcreteTestObserver : public IParameterObserver{
     }
 };
 
-class DataUpdateSubject : public IParameterObserver{
+class DataUpdateSubject : public IParameterSubject{
     public:
-    void attach(const std::string& name, IParameterObserver* observer) {
+    void attach(const std::string& name, std::shared_ptr<IParameterObserver> observer) {
         _observers[name] = observer;
     }
-    void detach(const std::string& name, IParameterObserver* observer) {
+    void detach(const std::string& name, std::shared_ptr<IParameterObserver> observer) {
         _observers.erase(name);
     }
     void update(const std::string& name, float newValue) {
@@ -41,5 +42,5 @@ class DataUpdateSubject : public IParameterObserver{
         }
     }
     private:
-    std::map<std::string, IParameterObserver*> _observers;
+    std::map<std::string, std::shared_ptr<IParameterObserver>> _observers;
 };
