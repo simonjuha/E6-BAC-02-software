@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 #include "parameters.hpp"
-#include "displayDriver/uiDraw.hpp"
 
 /* INTEGER PARAMETER */
 
@@ -13,10 +12,6 @@ IntParameter::IntParameter(std::string name, int min, int max, int defaultValue)
     _max = max;
     _value = defaultValue;
     _defaultValue = defaultValue;
-}
-
-void IntParameter::accept(IDrawVisitor * visitor){
-    visitor->visit(this);
 }
 
 std::string IntParameter::name(){
@@ -59,10 +54,6 @@ OptionParameter::OptionParameter(std::string name, std::vector<std::string> opti
     _defaultValue = defaultValue;
 }
 
-void OptionParameter::accept(IDrawVisitor * visitor){
-    visitor->visit(this);
-}
-
 std::string OptionParameter::name(){
     return _name;
 }
@@ -101,10 +92,6 @@ FloatParameter::FloatParameter(std::string name, float min, float max, float def
     _value = defaultValue;
     _increment = increment;
     _defaultValue = defaultValue;
-}
-
-void FloatParameter::accept(IDrawVisitor * visitor){
-    visitor->visit(this);
 }
 
 std::string FloatParameter::name(){

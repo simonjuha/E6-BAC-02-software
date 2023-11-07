@@ -3,7 +3,6 @@
 #include <vector>
 #include <Arduino.h>
 #include "menuStructure/parameters.hpp"
-#include "displayDriver/uiDraw.hpp"
 #include "displayDriver/displayDriver.hpp"
 
 

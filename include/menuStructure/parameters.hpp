@@ -3,22 +3,13 @@
 #include <vector>
 #include "menuStructure/parameterObserver.hpp"
 
-// forward declaration
-class IDrawVisitor;
-
-class IDrawElement {
-    public:
-    virtual void accept(IDrawVisitor* visitor) = 0;
-};
-
-class IParameterControl : public IDrawElement{
+class IParameterControl{
     public:
     virtual void increment() = 0;
     virtual void decrement() = 0;
     virtual void reset() = 0;
     virtual std::string name() = 0;
     virtual std::string value() = 0;
-    virtual void accept(IDrawVisitor* visitor) = 0;
 };
 
 
@@ -27,8 +18,6 @@ class IntParameter :    public IParameterControl,
 {
     public:
         IntParameter(std::string name = "unknown", int min = 0, int max = 100, int defaultValue = 0);
-        // IDrawElement
-        void accept(IDrawVisitor* visitor) override;
         // IParameterString
         std::string name() override;
         std::string value() override;
@@ -52,8 +41,6 @@ class OptionParameter : public IParameterControl,
 {
     public:
         OptionParameter(std::string name = "unknown", std::vector<std::string> options = {"option1", "option2", "option3"}, int defaultValue = 0);
-        // IDrawElement
-        void accept(IDrawVisitor* visitor) override;
         // IParameterString
         std::string name() override;
         std::string value() override;
@@ -74,8 +61,6 @@ class FloatParameter :  public IParameterControl,
 {
     public:
         FloatParameter(std::string name = "unknown", float min = 0, float max = 100, float defaultValue = 0, float increment = 0.01);
-        // IDrawElement
-        void accept(IDrawVisitor* visitor) override;
         // IParameterString
         std::string name() override;
         std::string value() override;
