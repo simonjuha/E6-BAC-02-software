@@ -18,7 +18,7 @@
 
 // this class needs to be optimized for speed as much as possible
 // BU9480F
-class AudioDriver {
+class AudioDriver : public IParameterObserver{
     public:
     AudioDriver(){
         vspi = new SPIClass(AUDIO_SPI_BUS);
@@ -43,6 +43,20 @@ class AudioDriver {
             digitalWrite(AUDIO_SPI_LR, LOW);
             algorithms[1]->play(sampleSlot[1], vspi);
             lastSampleTime = currentTime;
+        }
+    }
+
+    void update(const std::string& name, float newValue) override{
+        if(name == "algorithm"){
+            delete algorithms[0];
+            delete algorithms[1];
+            if(newValue == 0){
+                algorithms[0] = new forwardAlgorithm();
+                algorithms[1] = new forwardAlgorithm();
+            }else if(newValue == 1){
+                algorithms[0] = new backwardAlgorithm();
+                algorithms[1] = new backwardAlgorithm();
+            }
         }
     }
 

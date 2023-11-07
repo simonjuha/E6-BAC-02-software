@@ -14,7 +14,7 @@ class forwardAlgorithm : public playbackAlgorithm
     public:
     void play(Sample *sample, SPIClass *vspi)
     {
-        static int currentPosition = 0;
+        static unsigned int currentPosition = 0;
         vspi->transfer(sample->buffer[currentPosition]);
         if(currentPosition++ > sample->size){
             currentPosition = 0;
@@ -28,9 +28,9 @@ class backwardAlgorithm : public playbackAlgorithm
     public:
     void play(Sample *sample, SPIClass *vspi)
     {
-        static int currentPosition = sample->size;
+        static unsigned int currentPosition = sample->size;
         vspi->transfer(sample->buffer[currentPosition]);
-        if(currentPosition-- < 0){
+        if(currentPosition-- <= 0){
             currentPosition = sample->size;
         }
     }
