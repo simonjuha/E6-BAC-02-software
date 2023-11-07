@@ -72,6 +72,11 @@ class DisplayDriver{
     }
 
     void setLines(std::vector<std::string> lines){
+        if (lines.size() == 0)
+        {
+            ESP_LOGW("DisplayDriver", "No lines to display");
+            return;
+        }
         _lines = lines;
         refreshPositions();
         writeRelativeLines();

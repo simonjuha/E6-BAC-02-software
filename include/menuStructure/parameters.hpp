@@ -26,7 +26,6 @@ class IntParameter :    public IParameterControl,
         void decrement() override;
         void reset() override;
     private:
-        std::map<std::string, IParameterObserver*> _observers;
         int _defaultValue = 0;
         int _value = 0;
         int _min = 0;

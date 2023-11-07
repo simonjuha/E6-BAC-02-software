@@ -18,6 +18,10 @@ class MenuUI {
             return _selected;
         }
         void refresh(){
+            if(_parameters.size() == 0){
+                ESP_LOGW("MenuUI", "No parameters to display");
+                return;
+            }
             _lines.clear();
             for(int i = 0; i < _parameters.size(); i++){
                 _lines.push_back(getParameterString(_parameters[i]));

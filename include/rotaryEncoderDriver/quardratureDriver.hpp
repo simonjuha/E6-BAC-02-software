@@ -1,5 +1,8 @@
+#pragma once
 #include <Arduino.h>
 #include "rotaryEncoderDriver/IRotary.hpp"
+
+#define QUARDRATURE_DEBOUNCE 1
 
 class Quadrature : public RotarySubject{
 public:
@@ -47,12 +50,14 @@ public:
     static void ISR_clk(void* arg){
         if(arg){ // if arg is not null
             // debounce
-            static double lastTime = 0;
-            double time = millis();
-            if(time - lastTime < 5){
-                return; // ignore interrupt
-            }
-            lastTime = time;
+            #if QUARDRATURE_DEBOUNCE
+                static double lastTime = 0;
+                double time = millis();
+                if(time - lastTime < 5){
+                    return; // ignore interrupt
+                }
+                lastTime = time;
+            #endif
             Quadrature *instance = static_cast<Quadrature*>(arg); // get this instance.
             instance->checkChange();
 
