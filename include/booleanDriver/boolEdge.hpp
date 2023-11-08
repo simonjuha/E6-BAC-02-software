@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <algorithm>
 
@@ -5,6 +7,25 @@ class IEdgeObserver{
     public:
         virtual void rise() = 0;
         virtual void fall() = 0;
+        void tick(){
+            if(_interruptRise){
+                rise();
+                _interruptRise = false;
+            }
+            if(_interruptFall){
+                fall();
+                _interruptFall = false;
+            }
+        }
+        void interruptRise(){
+            _interruptRise = true;
+        }
+        void interruptFall(){
+            _interruptFall = true;
+        }
+    private:
+        bool _interruptRise = false;
+        bool _interruptFall = false;
 };
 
 class EdgeSubject{
@@ -27,14 +48,12 @@ void EdgeSubject::detach(IEdgeObserver* o){
 
 void EdgeSubject::rise(){
     for(auto o : observers){
-        o->rise();
+        o->interruptRise();
     }
 }
 
 void EdgeSubject::fall(){
     for(auto o : observers){
-        o->fall();
+        o->interruptFall();
     }
 }
-
-
