@@ -15,14 +15,11 @@ class AudioChannelButton : public IEdgeObserver{
         button->attach(this);
     }
     void rise() override{
-        ESP_LOGI("AudioChannelButton", "Channel %d selected", _channelNumber);
         _driver->selectChannel(_channelNumber);
         _menu->select(_channelNumber);
     }
     void fall() override{
-        ESP_LOGI("AudioChannelButton", "Channel %d selected", _channelNumber);
-        _driver->selectChannel(_channelNumber);
-        _menu->select(_channelNumber);
+
     }
     private:
     int _channelNumber;

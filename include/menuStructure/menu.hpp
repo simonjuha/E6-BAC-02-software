@@ -75,6 +75,7 @@ class MenuSelector{
         void select(int index){
             if(index < _menus.size()){
                 _selectedMenu = _menus[index];
+                DisplayDriver::getInstance().clear();
                 _selectedMenu->refresh();
             }else{
                 ESP_LOGW("MenuSelector", "Invalid menu index");

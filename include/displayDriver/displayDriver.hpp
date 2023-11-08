@@ -26,7 +26,9 @@ class DisplayDriver{
             ESP_LOGE("DisplayDriver", "Wire.begin() failed");
         }
         _display = Adafruit_SSD1306(SSD1306_SCREEN_WIDTH, SSD1306_SCREEN_HEIGHT, &Wire, -1);
-        _display.begin(SSD1306_SWITCHCAPVCC, SSD1306_ADDRESS);
+        if(!_display.begin(SSD1306_SWITCHCAPVCC, SSD1306_ADDRESS)){
+            ESP_LOGE("DisplayDriver", "SSD1306 allocation failed");
+        }
         _display.setTextColor(WHITE);
         _display.setTextSize(1);
         _display.setRotation(2);
@@ -34,7 +36,8 @@ class DisplayDriver{
     }
 
     void writeFixedLines(std::vector<std::string> lines, int selectedLine){
-        for(int i=0; i < _maxLines; i++){
+        int nLinesToPrint = std::min(_maxLines, static_cast<int>(lines.size()));
+        for(int i=0; i < nLinesToPrint; i++){
                 std::string lineToPrint;
                 if(selectedLine == i){
                     _display.fillRect(0,i*_lineHeight-2,_displayWidth,_lineHeight+1,WHITE);
@@ -55,20 +58,21 @@ class DisplayDriver{
     }
 
     void select(int sel){
-        if(sel < 0 || sel > _lines.size()){
+        if(sel < 0 || sel >= _lines.size()){
             ESP_LOGW("DisplayDriver", "Invalid line selection");
             return;
         }
         _selectedLine = sel;
         refreshPositions();
+        ESP_LOGI("DisplayDriver", "after refresh");
         writeRelativeLines();
+        ESP_LOGI("DisplayDriver", "after write");
     }
 
     void writeRelativeLines(){
-        std::vector<std::string> fixedLines = {
-            _lines.begin() + _scroll,
-            _lines.begin() + _scroll + _maxLines
-        };
+    auto startIt = _lines.begin() + _scroll;
+    auto endIt = (_lines.size() < _maxLines) ? _lines.end() : startIt + _maxLines;
+    std::vector<std::string> fixedLines(startIt, endIt);
         writeFixedLines(fixedLines, _relativeSelectedLine);
     }
 
@@ -90,24 +94,32 @@ class DisplayDriver{
 
     private:
     // recalculate the position based on seleect display height vector length etc.
-    void refreshPositions(){
-    _listLines = _lines.size();
-    if(_selectedLine >= _maxLines) // if selected line is beyond the visible display
-    {
-        _scroll = _selectedLine - _maxLines + 1;
-        _relativeSelectedLine = _maxLines - 1;
-    }
-    else // if selected line is within the visible display
-    {
-        _scroll = 0;
-        _relativeSelectedLine = _selectedLine;
+void refreshPositions() {
+    _listLines = _lines.size(); // Get the total number of lines
+    _scroll = 0; // Default scroll to 0
+    _relativeSelectedLine = _selectedLine; // By default, the relative selected line is the same as the selected line
+
+    // If the number of lines is less than _maxLines, no need to scroll or adjust
+    if (_listLines > _maxLines) {
+        // If the selected line is beyond the visible display
+        if (_selectedLine >= _maxLines) {
+            _scroll = _selectedLine - _maxLines + 1; // Calculate scroll position
+            _relativeSelectedLine = _maxLines - 1; // Set the relative selected line to the last visible line
+        } else {
+            // If the selected line is within the visible display, no need to scroll
+            _scroll = 0;
+            _relativeSelectedLine = _selectedLine;
+        }
+
+        // If the scroll is beyond the list length, adjust it
+        if (_scroll > _listLines - _maxLines) {
+            _scroll = _listLines - _maxLines;
+        }
     }
 
-    // if the scroll is beyond the list length
-    if (_scroll > _listLines - _maxLines) {
-        _scroll = _listLines - _maxLines;
-    }
-
+    // Ensure the relative selected line is within bounds
+    _relativeSelectedLine = std::min(_relativeSelectedLine, _maxLines - 1);
+    _relativeSelectedLine = std::max(0, _relativeSelectedLine); // Ensure it's not negative
 }
 
     DisplayDriver(){}
