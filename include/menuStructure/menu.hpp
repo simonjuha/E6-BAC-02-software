@@ -62,3 +62,29 @@ class MenuUI {
     int _selectedIndex = 0;
 
 };
+
+class MenuSelector{
+    public:
+        MenuSelector(){}
+        void addMenu(MenuUI * menu){
+            _menus.push_back(menu);
+            if(_selectedMenu == nullptr){
+                _selectedMenu = menu;
+            }
+        }
+        void select(int index){
+            if(index < _menus.size()){
+                _selectedMenu = _menus[index];
+                _selectedMenu->refresh();
+            }else{
+                ESP_LOGW("MenuSelector", "Invalid menu index");
+            }
+        }
+        MenuUI* getSelectedMenu(){
+            return _selectedMenu;
+        }
+
+    private:
+        std::vector<MenuUI*> _menus;
+        MenuUI* _selectedMenu;
+};
