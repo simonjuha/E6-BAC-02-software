@@ -6,12 +6,13 @@
 
 /* INTEGER PARAMETER */
 
-IntParameter::IntParameter(std::string name, int min, int max, int defaultValue){
+IntParameter::IntParameter(std::string name, int min, int max, int defaultValue, int step){
     _name = name;
     _min = min;
     _max = max;
     _value = defaultValue;
     _defaultValue = defaultValue;
+    _step = step;
 }
 
 std::string IntParameter::name(){
@@ -25,7 +26,7 @@ std::string IntParameter::value(){
 void IntParameter::increment(){
     if (_value < _max)
     {
-        _value++;
+        _value += _step;
         update(_name, _value);
     }
 }
@@ -33,7 +34,7 @@ void IntParameter::increment(){
 void IntParameter::decrement(){
     if (_value > _min)
     {
-        _value--;
+        _value -= _step;
         update(_name, _value);
 
     }

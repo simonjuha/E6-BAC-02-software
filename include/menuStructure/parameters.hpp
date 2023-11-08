@@ -17,7 +17,7 @@ class IntParameter :    public IParameterControl,
                         public DataUpdateSubject
 {
     public:
-        IntParameter(std::string name = "unknown", int min = 0, int max = 100, int defaultValue = 0);
+        IntParameter(std::string name = "unknown", int min = 0, int max = 100, int defaultValue = 0, int step = 1);
         // IParameterString
         std::string name() override;
         std::string value() override;
@@ -30,6 +30,7 @@ class IntParameter :    public IParameterControl,
         int _value = 0;
         int _min = 0;
         int _max = 100;
+        int _step = 1;
         std::string _name;
         
 };
