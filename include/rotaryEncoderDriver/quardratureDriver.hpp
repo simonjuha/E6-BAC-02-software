@@ -33,6 +33,7 @@ public:
         gpio_intr_enable(_clk); // enable gpio interrupt
         
     }
+private:
     void checkChange(){
         // check if clk has changed since last check, if it has check if clk == dt, if so up, else down.
         clkNewState = gpio_get_level(_clk);
@@ -63,7 +64,6 @@ public:
 
         }
     }
-private:
     gpio_num_t _clk;
     gpio_num_t _dt;
     bool clkLastState = false;
