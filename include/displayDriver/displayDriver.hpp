@@ -56,6 +56,7 @@ class DisplayDriver{
 
     void select(int sel){
         if(sel < 0 || sel > _lines.size()){
+            ESP_LOGW("DisplayDriver", "Invalid line selection");
             return;
         }
         _selectedLine = sel;
