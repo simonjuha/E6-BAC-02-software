@@ -21,7 +21,11 @@
 // BU9480F
 class AudioDriver : public IParameterObserver{
     public:
-    AudioDriver(){
+    static AudioDriver& getInstance(){
+        static AudioDriver instance;
+        return instance;
+    }
+    void init(){
         vspi = new SPIClass(AUDIO_SPI_BUS);
         vspi->setFrequency(10000000);
         vspi->begin(AUDIO_SPI_CLK, 7, AUDIO_SPI_DAT);
@@ -37,7 +41,10 @@ class AudioDriver : public IParameterObserver{
     void tick(){
         static uint32_t lastSampleTime = 0;
         uint32_t currentTime = micros();
-
+        if(sampleSlot[0] == nullptr || sampleSlot[1] == nullptr){
+            ESP_LOGE("AudioDriver", "No sample loaded");
+            return;
+        }
         if(currentTime - lastSampleTime >= sampleInterval){
             digitalWrite(AUDIO_SPI_LR, HIGH);
             algorithms[0]->play(sampleSlot[0], vspi);
@@ -76,4 +83,9 @@ class AudioDriver : public IParameterObserver{
     playbackAlgorithm * algorithms[NUM_OF_SAMPLES];
     uint32_t sampleInterval = SAMPLE_INTERVAL;
     int _channelSelect = 0;
+    // singleton stuff
+    AudioDriver(){};
+    AudioDriver(AudioDriver const&); // copy constructor is private
+    AudioDriver& operator=(AudioDriver const&); // assignment operator is private
+    ~AudioDriver(){};
 };
