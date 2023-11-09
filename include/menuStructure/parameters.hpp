@@ -40,7 +40,7 @@ class OptionParameter : public IParameterControl,
                         public DataUpdateSubject
 {
     public:
-        OptionParameter(std::string name = "unknown", std::vector<std::string> options = {"option1", "option2", "option3"}, int defaultValue = 0);
+        OptionParameter(std::string name = "unknown", std::shared_ptr<std::vector<std::string>> options , int defaultValue = 0);
         // IParameterString
         std::string name() override;
         std::string value() override;
@@ -52,7 +52,7 @@ class OptionParameter : public IParameterControl,
         int _defaultValue;
         int _value;
         int _numOptions;
-        std::vector<std::string> _options;
+        std::shared_ptr<std::vector<std::string>> _options;
         std::string _name;
 };
 

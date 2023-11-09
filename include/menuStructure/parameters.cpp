@@ -47,10 +47,10 @@ void IntParameter::reset(){
 
 /* OPTION PARAMETER */
 
-OptionParameter::OptionParameter(std::string name, std::vector<std::string> options, int defaultValue){
+OptionParameter::OptionParameter(std::string name, std::shared_ptr<std::vector<std::string>> options, int defaultValue){
     _name = name;
     _options = options;
-    _numOptions = options.size();
+    _numOptions = options->size();
     _value = defaultValue;
     _defaultValue = defaultValue;
 }
@@ -60,7 +60,7 @@ std::string OptionParameter::name(){
 }
 
 std::string OptionParameter::value(){
-    return _options[_value];
+    return _options->at(_value);
 }
 
 void OptionParameter::increment(){
