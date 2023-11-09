@@ -12,17 +12,23 @@
 
 class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
     public:
+    static SdCardDriver& getInstance(){
+        static SdCardDriver instance;
+        return instance;
+    }
 
-    SdCardDriver(){
+    int init(){
         _hspi = new SPIClass(SD_SPI_BUS);
         _hspi->begin(SD_SPI_CLK, SD_SPI_MISO, SD_SPI_MOSI, SD_SPI_CS);
         pinMode(SD_SPI_CS, OUTPUT);
         pinMode(SD_SPI_MISO, INPUT);
         if (!SD.begin(SD_SPI_CS, *_hspi)) {
             ESP_LOGE("SD", "Card Mount Failed");
+            return -1;
         }else{
             ESP_LOGI("SD", "Card Mount Success");
         }
+        return 0;
     }
 
     int getNumberOfSamples(){
@@ -96,4 +102,7 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
         ESP_LOGE("SD", "sample_count not found");
         return -1;
     }
+    SdCardDriver(){};
+    SdCardDriver(SdCardDriver const&); // Don't Implement
+    void operator=(SdCardDriver const&); // Don't implement
 };
