@@ -7,7 +7,7 @@
 class ISdCardLoad
 {
     public:
-    virtual int getSampleByName(std::string fileName, Sample *sample) = 0;
+    virtual int getSampleByName(std::string fileName, Sample &sample) = 0;
 };
 
 // ISdCardObserver interface

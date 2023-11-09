@@ -1,7 +1,9 @@
+#pragma once
 #include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
 #include "sdCardDriver/SDcardInterfaces.hpp"
+#include "sdCardDriver/sample.hpp"  
 
 #define SD_SPI_CS     10  // chip select
 #define SD_SPI_MOSI   11  // mosi
@@ -39,7 +41,9 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
             if(!entry){
                 break;
             }
-            numberOfFiles++; // + 1 to number of files
+            if(!entry.isDirectory()){
+                numberOfFiles++; // + 1 to number of files
+            }
         }
         return numberOfFiles;
     }
@@ -52,42 +56,51 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
             if(!entry){
                 break;
             }
-            fileNames.push_back(entry.name()); // Add file name to vector
+            if(!entry.isDirectory()){
+                fileNames.push_back(entry.name()); // Add file name to vector
+                ESP_LOGI("SD", "File: %s", entry.name());
+            }
         }
         return fileNames;
     }
 
-    int getSampleByName(std::string fileName, Sample *sample){
+    int getSampleByName(std::string fileName, Sample &sample){
         File file = SD.open(("/"+fileName).c_str());    // open wav file
         static uint8_t headSize = 44;                   // wav header size in bytes
         if(!file){
-            ESP_LOGE("SD", "File not found");
+            ESP_LOGE("SD", "File: %s not found", fileName.c_str());
             return -1;
         }
-        ESP_LOGI("SD", "File found");
+        if(file.isDirectory()){
+            ESP_LOGE("SD", "File is directory");
+            return -1;
+        }
         
         // CALCULATE SAMPLE SIZE
         int sampleSize = getSampleSize(&file);                                      // get sample size in 16 bit bytes
         int zeroPadding = file.size() - headSize - (sampleSize * sizeof(int16_t));  // zero padding in 8bit bytes preceeding sample data
-        sample->size = sampleSize;                                                  // subtract header size and divide by 2 (16 bit)
-        delete[] sample->buffer;                                                    // deallocate old buffer
-        sample->buffer = new int16_t[sample->size];                                 // allocate new buffer
-
+        sample.size = sampleSize;                                                  // subtract header size and divide by 2 (16 bit)
+        sample.buffer.resize(sampleSize);                                // allocate new buffer
         // GET WAV DATA BLOCK
         file.seek(headSize + 1 + zeroPadding);    // skip first 44 bytes (header) and skip zero padding
-        for(int i = 0; i <= sample->size; i++) // read data (wav file)
+        for(int i = 0; i < sample.size; i++) // read data (wav file)
         {
             uint8_t lsb = file.read();
             uint8_t msb = file.read();
-            sample->buffer[i] = static_cast<int16_t>((msb << 8) | lsb); // combine msb and lsb into 16 bit byte
+            sample.buffer[i] = static_cast<int16_t>((msb << 8) | lsb); // combine msb and lsb into 16 bit byte
         }
         file.close();
+        ESP_LOGI("SD", "File closed");
         return 0;
     }
 
     private:
     SPIClass *_hspi;
     int getSampleSize(File* file){
+        if(file->isDirectory()){
+            ESP_LOGE("SD", "File is directory");
+            return 0;
+        }
         // get sample_count from head (line 9)
         // skip first 8 lines (\n)
         for(int i = 0; i < 8; i++){
@@ -96,7 +109,6 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
         // if next bytes form "sample_count -i " then read the number
         if(file->findUntil("sample_count -i ", "\n")){
             int sample_count = file->parseInt();
-            ESP_LOGV("SD", "sample_count found: %d", sample_count);
             return sample_count;
         }
         ESP_LOGE("SD", "sample_count not found");
