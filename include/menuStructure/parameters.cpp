@@ -60,6 +60,9 @@ std::string OptionParameter::name(){
 }
 
 std::string OptionParameter::value(){
+    if(_options == nullptr){
+        return "NO OPTIONS!";
+    }
     return _options->at(_value);
 }
 
