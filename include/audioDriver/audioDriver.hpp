@@ -82,6 +82,9 @@ class AudioDriver : public IParameterObserver{
             }else if(newValue == 1){
                 algorithms[_channelSelect] = new backwardAlgorithm();
             }
+            else if(newValue == 2){
+                algorithms[_channelSelect] = new pingPongAlgorithm();
+            }
             else{
                 ESP_LOGW("AudioDriver", "Invalid algorithm value");
             }
