@@ -16,7 +16,7 @@ class forwardAlgorithm : public playbackAlgorithm
     unsigned int currentPosition = 0;
     int16_t & play(Sample &sample)
     {
-        if(currentPosition >= sample.size){
+        if(currentPosition >= sample.size-1){
             currentPosition = 0;
         }
         return sample.buffer[++currentPosition];
@@ -30,7 +30,7 @@ class backwardAlgorithm : public playbackAlgorithm
     int16_t & play(Sample &sample)
     {
         if(currentPosition <= 0){
-            currentPosition = sample.size;
+            currentPosition = sample.size-1;
         }
         return sample.buffer[--currentPosition];
     }
