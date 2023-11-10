@@ -37,7 +37,7 @@ class AudioDriver : public IParameterObserver{
         algorithms[0] = new forwardAlgorithm();
         algorithms[1] = new forwardAlgorithm();
 
-        // load default samples
+        // load default samples (temporay fix)
         SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[0]);
         SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[1]);
 
@@ -47,10 +47,6 @@ class AudioDriver : public IParameterObserver{
     void tick(){
         static uint32_t lastSampleTime = 0;
         uint32_t currentTime = micros();
-        if(&sampleSlot[0] == nullptr || &sampleSlot[1] == nullptr){
-            ESP_LOGE("AudioDriver", "No sample loaded");
-            return;
-        }
         if(currentTime - lastSampleTime >= sampleInterval){
             digitalWrite(AUDIO_SPI_LR, HIGH);
             algorithms[0]->play(sampleSlot[0], vspi);
@@ -60,7 +56,7 @@ class AudioDriver : public IParameterObserver{
         }
     }
     void selectChannel(int channel){
-        if(channel >= 0 && channel < NUM_OF_CHANNELS-1){
+        if(channel >= 0 && channel < NUM_OF_CHANNELS){
             _channelSelect = channel;
         }else{
             ESP_LOGE("AudioDriver", "Invalid channel value");
@@ -88,7 +84,6 @@ class AudioDriver : public IParameterObserver{
             }
         }
         if(name == "sample"){
-            ESP_LOGI("AudioDriver", "Sample: %s", _sampleMap[(int)newValue].c_str());
             if(newValue >= 0 && newValue < _sampleMap.size() ){
                 std::string searchName = _sampleMap[(int)newValue];
                 if(SdCardDriver::getInstance().getSampleByName(searchName, sampleSlot[_channelSelect]) != 0){

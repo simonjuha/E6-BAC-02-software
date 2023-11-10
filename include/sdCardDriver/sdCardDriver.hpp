@@ -58,7 +58,6 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
             }
             if(!entry.isDirectory()){
                 fileNames.push_back(entry.name()); // Add file name to vector
-                ESP_LOGI("SD", "File: %s", entry.name());
             }
         }
         return fileNames;
@@ -90,7 +89,6 @@ class SdCardDriver : public ISdCardLoad, public ISdCardInfo{
             sample.buffer[i] = static_cast<int16_t>((msb << 8) | lsb); // combine msb and lsb into 16 bit byte
         }
         file.close();
-        ESP_LOGI("SD", "File closed");
         return 0;
     }
 
