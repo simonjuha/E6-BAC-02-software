@@ -6,35 +6,32 @@
 class playbackAlgorithm
 {
     public:
-    virtual void play(Sample &sample, SPIClass *vspi) = 0;
+    virtual int16_t & play(Sample &sample) = 0;
+    private: unsigned int currentPositon = 0;
 };
 
 class forwardAlgorithm : public playbackAlgorithm
 {
     public:
-    void play(Sample &sample, SPIClass *vspi)
+    unsigned int currentPosition = 0;
+    int16_t & play(Sample &sample)
     {
-        static unsigned int currentPosition = 0;
-        if(currentPosition > sample.size-1){
+        if(currentPosition >= sample.size){
             currentPosition = 0;
         }
-        vspi->transfer(sample.buffer[currentPosition]);
-        currentPosition++;
+        return sample.buffer[++currentPosition];
     }
-
 };
 
 class backwardAlgorithm : public playbackAlgorithm
 {
     public:
-    void play(Sample &sample, SPIClass *vspi)
+    unsigned int currentPosition = 0;
+    int16_t & play(Sample &sample)
     {
-        static unsigned int currentPosition = sample.size;
-        if(currentPosition == 0){
+        if(currentPosition <= 0){
             currentPosition = sample.size;
         }
-        vspi->transfer(sample.buffer[currentPosition]);
-        currentPosition--;
+        return sample.buffer[--currentPosition];
     }
-
 };

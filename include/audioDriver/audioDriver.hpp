@@ -43,15 +43,16 @@ class AudioDriver : public IParameterObserver{
 
     }
 
-    // doesn't work in loop() ?
     void tick(){
         static uint32_t lastSampleTime = 0;
         uint32_t currentTime = micros();
         if(currentTime - lastSampleTime >= sampleInterval){
             digitalWrite(AUDIO_SPI_LR, HIGH);
-            algorithms[0]->play(sampleSlot[0], vspi);
+            int16_t& sampleByte0 = algorithms[0]->play(sampleSlot[0]);
+            vspi->transfer(sampleByte0);
             digitalWrite(AUDIO_SPI_LR, LOW);
-            algorithms[1]->play(sampleSlot[1], vspi);
+            int16_t& sampleByte1 = algorithms[1]->play(sampleSlot[1]);
+            vspi->transfer(sampleByte1);
             lastSampleTime = currentTime;
         }
     }
@@ -65,14 +66,14 @@ class AudioDriver : public IParameterObserver{
 
     // maybe add a class "modifyer" to pass value to
     void update(const std::string& name, float newValue) override{
-        if(name == "algorithm"){
+        if(name == "playback"){
             if (algorithms[_channelSelect] != nullptr){
                 delete algorithms[_channelSelect];
             }
             if(newValue == 0){
-                algorithms[0] = new forwardAlgorithm();
+                algorithms[_channelSelect] = new forwardAlgorithm();
             }else if(newValue == 1){
-                algorithms[0] = new backwardAlgorithm();
+                algorithms[_channelSelect] = new backwardAlgorithm();
             }
             else{
                 ESP_LOGW("AudioDriver", "Invalid algorithm value");
