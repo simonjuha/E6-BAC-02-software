@@ -64,9 +64,7 @@ class DisplayDriver{
         }
         _selectedLine = sel;
         refreshPositions();
-        ESP_LOGI("DisplayDriver", "after refresh");
         writeRelativeLines();
-        ESP_LOGI("DisplayDriver", "after write");
     }
 
     void writeRelativeLines(){
