@@ -4,7 +4,8 @@
 class MenuSelectionLeds
 {
     public:
-    MenuSelectionLeds() : _leds {LedDriver(0), LedDriver(21), LedDriver(47), LedDriver(38), LedDriver(42)}{}
+    MenuSelectionLeds() : _leds {LedDriver(45), LedDriver(42), LedDriver(38), LedDriver(47), LedDriver(21)}{
+    }
     void select(int channel){
         for(int i = 0; i < 5; i++){
             if(i == channel){

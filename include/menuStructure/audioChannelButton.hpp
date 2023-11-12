@@ -7,9 +7,10 @@
 
 class AudioChannelButton : public IEdgeObserver{
     public:
-    AudioChannelButton(int channelNumber, EdgeSubject * button, MenuSelector* menu) : 
+    AudioChannelButton(int channelNumber, EdgeSubject * button, MenuSelector* menu, MenuSelectionLeds* leds) : 
         _channelNumber(channelNumber), 
-        _menu(menu)
+        _menu(menu),
+        _leds(leds)
     {
         button->attach(this);
     }
@@ -18,10 +19,13 @@ class AudioChannelButton : public IEdgeObserver{
     }
     void fall() override{
         // falling edge trigger
-        AudioDriver::getInstance().selectChannel(_channelNumber);
+
+        AudioDriver::getInstance().selectChannel(_channelNumber);  
         _menu->select(_channelNumber);
+        _leds->select(_channelNumber);
     }
     private:
     int _channelNumber;
+    MenuSelectionLeds* _leds;
     MenuSelector* _menu;
 };
