@@ -5,7 +5,7 @@
 class SelectorRotary : public IRotaryObserver{
     public:
         SelectorRotary(){}
-        SelectorRotary(MenuSelector *ui) : _rotary(35, 36)
+        SelectorRotary(MenuSelector *ui) : _rotary(2,1)
         {
             _rotary.attach(this);
             _menuUISelector = ui;
@@ -27,7 +27,7 @@ class SelectorRotary : public IRotaryObserver{
 class ValueRotary : public IRotaryObserver{
     public:
         ValueRotary(){}
-        ValueRotary(MenuSelector *ui) : _rotary(2, 1)
+        ValueRotary(MenuSelector *ui) : _rotary(35,36)
         {
             _rotary.attach(this);
             _menuUISelector = ui;

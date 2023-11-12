@@ -14,11 +14,12 @@ class AudioChannelButton : public IEdgeObserver{
         button->attach(this);
     }
     void rise() override{
-        AudioDriver::getInstance().selectChannel(_channelNumber);
-        _menu->select(_channelNumber);
+        // no action
     }
     void fall() override{
-
+        // falling edge trigger
+        AudioDriver::getInstance().selectChannel(_channelNumber);
+        _menu->select(_channelNumber);
     }
     private:
     int _channelNumber;
