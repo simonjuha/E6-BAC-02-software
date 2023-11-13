@@ -10,10 +10,15 @@
 
 #define AUDIO_SPI_CLK 4
 #define AUDIO_SPI_DAT 5
-#define AUDIO_SPI_LR  6
 #define AUDIO_SPI_BUS 1
 
-#define NUM_OF_CHANNELS 2
+#define AUDIO_SPI_LR_1 6
+#define AUDIO_SPI_LR_2 7
+
+#define AUDIO_SPI_ANDLOGIC_CS_1  16
+#define AUDIO_SPI_ANDLOGIC_CS_2  17
+
+#define NUM_OF_CHANNELS 4
 
 #define DEFAULT_SAMPLERATE 44100
 #define SAMPLE_INTERVAL 1000000/DEFAULT_SAMPLERATE // in microseconds
@@ -30,20 +35,30 @@ class AudioDriver : public IParameterObserver{
         vspi = new SPIClass(AUDIO_SPI_BUS);
         vspi->setFrequency(10000000);
         vspi->begin(AUDIO_SPI_CLK, 7, AUDIO_SPI_DAT);
-        pinMode(AUDIO_SPI_LR, OUTPUT);
+        pinMode(AUDIO_SPI_LR_1, OUTPUT);
+        pinMode(AUDIO_SPI_LR_2, OUTPUT);
+        pinMode(AUDIO_SPI_ANDLOGIC_CS_1, OUTPUT);
+        pinMode(AUDIO_SPI_ANDLOGIC_CS_2, OUTPUT);
         for(int i = 0; i < SdCardDriver::getInstance().getNumberOfSamples(); i++){
             _sampleMap[i] = SdCardDriver::getInstance().getSampleNames()[i];
         }
         algorithms[0] = new forwardAlgorithm();
         algorithms[1] = new forwardAlgorithm();
+        algorithms[2] = new forwardAlgorithm();
+        algorithms[3] = new forwardAlgorithm();
 
         // load default samples (temporay fix)
         SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[0]);
         SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[1]);
+        SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[2]);
+        SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[3]);
 
         // load default volume
         _sampleVolume[0] = 0.5f;
         _sampleVolume[1] = 0.5f;
+        _sampleVolume[2] = 0.5f;
+        _sampleVolume[3] = 0.5f;
+
 
     }
 
@@ -52,20 +67,40 @@ class AudioDriver : public IParameterObserver{
         uint32_t currentTime = micros();
         if(currentTime - lastSampleTime >= sampleInterval){
 
-            digitalWrite(AUDIO_SPI_LR, HIGH);
+            digitalWrite(AUDIO_SPI_ANDLOGIC_CS_1, HIGH);
+
+            digitalWrite(AUDIO_SPI_LR_1, HIGH);
             int8_t sampleByte0 = (int8_t)algorithms[0]->play(sampleSlot[0]);
             vspi->transfer(static_cast<uint8_t>(sampleByte0* _sampleVolume[0])) ;
 
-            digitalWrite(AUDIO_SPI_LR, LOW);
+            digitalWrite(AUDIO_SPI_LR_1, LOW);
             int8_t sampleByte1 = (int8_t)algorithms[1]->play(sampleSlot[1]);
             vspi->transfer(static_cast<uint8_t>(sampleByte1* _sampleVolume[1]));
+
+            digitalWrite(AUDIO_SPI_ANDLOGIC_CS_1, LOW);
+            digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, HIGH);
+
+            digitalWrite(AUDIO_SPI_LR_2, HIGH);
+            int8_t sampleByte2 = (int8_t)algorithms[2]->play(sampleSlot[2]);
+            vspi->transfer(static_cast<uint8_t>(sampleByte2* _sampleVolume[2])) ;
+
+            digitalWrite(AUDIO_SPI_LR_2, LOW);
+            int8_t sampleByte3 = (int8_t)algorithms[3]->play(sampleSlot[3]);
+            vspi->transfer(static_cast<uint8_t>(sampleByte3* _sampleVolume[3]));
+
+            digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, LOW);
             
             lastSampleTime = currentTime;
         }
     }
     void selectChannel(int channel){
-        if(channel >= 0 && channel < NUM_OF_CHANNELS){
-            _channelSelect = channel;
+        if(channel == 0){
+            ESP_LOGI("AudioDriver", "Global channel selected");
+            return;
+        }
+        int newChannel = channel-1;
+        if(newChannel >= 0 && newChannel < NUM_OF_CHANNELS){
+            _channelSelect = newChannel;
         }else{
             ESP_LOGE("AudioDriver", "Invalid channel value");
         }
