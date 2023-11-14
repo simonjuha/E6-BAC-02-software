@@ -24,6 +24,12 @@
 #define DEFAULT_SAMPLERATE 44100
 #define SAMPLE_INTERVAL 1000000/DEFAULT_SAMPLERATE // in microseconds
 
+enum GateMode{
+    HOLD_MODE,
+    TRIGGER_ONCE_MODE,
+    LOOP_MODE
+};
+
 // this class needs to be optimized for speed as much as possible
 // BU9480F
 class AudioDriver : public IParameterObserver{
@@ -66,13 +72,14 @@ class AudioDriver : public IParameterObserver{
     void tick(){
         static uint32_t lastSampleTime = 0;
         uint32_t currentTime = micros();
+        _gateInputs.tick();
         if(currentTime - lastSampleTime >= sampleInterval){
 
             /* CHANNEL 0 SELECT */
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_1, HIGH);
             digitalWrite(AUDIO_SPI_LR_1, HIGH);
 
-            if(gate(0) == 1)
+            if(gate(0))
             {
                 int8_t sampleByte0 = (int8_t)algorithms[0]->play(sampleSlot[0]);
                 vspi->transfer(static_cast<uint8_t>(sampleByte0* _sampleVolume[0])) ;
@@ -80,7 +87,7 @@ class AudioDriver : public IParameterObserver{
 
             /* CHANNEL 1 SELECT */
             digitalWrite(AUDIO_SPI_LR_1, LOW);
-            if(gate(1) == 1)
+            if(gate(1))
             {
                 int8_t sampleByte1 = (int8_t)algorithms[1]->play(sampleSlot[1]);
                 vspi->transfer(static_cast<uint8_t>(sampleByte1* _sampleVolume[1]));
@@ -91,7 +98,7 @@ class AudioDriver : public IParameterObserver{
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, HIGH);
             digitalWrite(AUDIO_SPI_LR_2, HIGH);
 
-            if(gate(2) == 1)
+            if(gate(2))
             {
                 int8_t sampleByte2 = (int8_t)algorithms[2]->play(sampleSlot[2]);
                 vspi->transfer(static_cast<uint8_t>(sampleByte2* _sampleVolume[2])) ;
@@ -100,11 +107,11 @@ class AudioDriver : public IParameterObserver{
             /* CHANNEL 3 SELECT */
             digitalWrite(AUDIO_SPI_LR_2, LOW);
 
-            if(gate(3) == 1){
+            if(gate(3)){
             int8_t sampleByte3 = (int8_t)algorithms[3]->play(sampleSlot[3]);
             vspi->transfer(static_cast<uint8_t>(sampleByte3* _sampleVolume[3]));
             }
-            
+
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, LOW);
             
             lastSampleTime = currentTime;
@@ -172,6 +179,18 @@ class AudioDriver : public IParameterObserver{
             _sampleVolume[_channelSelect] = newValue;
             return;
         }
+        if(name == "gateMode"){
+            if(newValue == 0){
+                _gateModes[_channelSelect] = HOLD_MODE;
+            }else if(newValue == 1){
+                _gateModes[_channelSelect] = TRIGGER_ONCE_MODE;
+            }else if(newValue == 2){
+                _gateModes[_channelSelect] = LOOP_MODE;
+            }else{
+                ESP_LOGE("AudioDriver", "Invalid gate mode value");
+            }
+            return;
+        }
     }
 
     private:
@@ -180,6 +199,8 @@ class AudioDriver : public IParameterObserver{
     Sample sampleSlot[NUM_OF_CHANNELS]; // 4 samples to be played
     playbackAlgorithm * algorithms[NUM_OF_CHANNELS];
     double _sampleVolume[NUM_OF_CHANNELS];
+    GateMode _gateModes[NUM_OF_CHANNELS] = {HOLD_MODE, HOLD_MODE, HOLD_MODE, HOLD_MODE};
+    bool triggeredSamples[NUM_OF_CHANNELS] = {false, false, false, false};
     GateInputs _gateInputs;
     uint32_t sampleInterval = SAMPLE_INTERVAL;
     std::map<int, std::string> _sampleMap;
@@ -190,22 +211,64 @@ class AudioDriver : public IParameterObserver{
     ~AudioDriver(){};
     // method decides if something is transfered or not
     bool gate(int gateChannel){
+        GateMode mode = _gateModes[gateChannel];
         if(gateChannel >= 0 && gateChannel < NUM_OF_CHANNELS){
-            if(_gateInputs.read(gateChannel) == 1){
-                // transfer something
-                return true;
-            }
-            else
-            {
-                // no gate dont transfer
-                vspi->transfer(0);
-                return false;
+            bool rise = _gateInputs.risingEdge(gateChannel);
+            bool gateHigh = _gateInputs.read(gateChannel);
+            bool sampleEnd = algorithms[gateChannel]->isAtEnd(sampleSlot[gateChannel]);
+            switch (mode) {
+                case HOLD_MODE:{
+                    // gate HIGH: keep transfering
+                    if(gateHigh == true){
+                        return true;
+                    }
+
+                    // gate LOW: dont transfer
+                    if(gateHigh == false){
+                        vspi->transfer(0);
+                        return false;
+                    }
+                    break;
+                }
+
+                case TRIGGER_ONCE_MODE: {
+                    // trigger
+                    if(rise){
+                        triggeredSamples[gateChannel] = true;
+                        return true;
+                    }
+
+                    // when sample is playing
+                    if(triggeredSamples[gateChannel] == true){
+                        // keep playing if sample is not at end
+                        if(sampleEnd == false){
+                            return true;
+                        }
+                        // stop playing if sample is at end
+                        if(sampleEnd == true){
+                            triggeredSamples[gateChannel] = false;
+                            vspi->transfer(0);
+                            return false;
+                        }
+                    }
+
+                    vspi->transfer(0);
+                    return false;
+                }
+
+                case LOOP_MODE: {
+                    return true; // just loop
+                    break;
+                }
+                default: {
+                    ESP_LOGE("AudioDriver", "Invalid gate mode");
+                    return false;
+                    break;
+                }
             }
         }
-        else
-        {
-            ESP_LOGE("AudioDriver", "Invalid gate channel");
-            return false;
-        }
+        
+        ESP_LOGE("AudioDriver", "Invalid gate channel");
+        return false; 
     }
 };
