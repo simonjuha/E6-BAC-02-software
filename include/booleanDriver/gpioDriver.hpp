@@ -1,3 +1,4 @@
+#pragma once
 #include <esp32-hal-gpio.h>
 #include "booleanDriver/IBool.hpp"
 #include "booleanDriver/boolEdge.hpp"
