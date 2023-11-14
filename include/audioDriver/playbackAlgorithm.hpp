@@ -7,13 +7,13 @@ class playbackAlgorithm
 {
     public:
     virtual int16_t & play(Sample &sample) = 0;
-    private: unsigned int currentPositon = 0;
+    protected: 
+    unsigned int currentPosition = 0;
 };
 
 class forwardAlgorithm : public playbackAlgorithm
 {
     public:
-    unsigned int currentPosition = 0;
     int16_t & play(Sample &sample)
     {
         if(currentPosition >= sample.size-1){
