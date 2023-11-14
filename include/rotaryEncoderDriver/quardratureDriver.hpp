@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "rotaryEncoderDriver/IRotary.hpp"
 
-#define QUARDRATURE_DEBOUNCE 1
+#define QUARDRATURE_DEBOUNCE 6
 
 class Quadrature : public RotarySubject{
 public:
@@ -35,6 +35,14 @@ public:
     }
 private:
     void checkChange(){
+        #if QUARDRATURE_DEBOUNCE
+            static unsigned long lastTime = 0;
+            unsigned long time = millis();
+            if(time - lastTime < QUARDRATURE_DEBOUNCE){
+                return; // ignore interrupt
+            }
+            lastTime = time;
+        #endif
         // check if clk has changed since last check, if it has check if clk == dt, if so up, else down.
         clkNewState = gpio_get_level(_clk);
         if(clkNewState != clkLastState){
@@ -50,18 +58,8 @@ private:
     }
     static void ISR_clk(void* arg){
         if(arg){ // if arg is not null
-            // debounce
-            #if QUARDRATURE_DEBOUNCE
-                static double lastTime = 0;
-                double time = millis();
-                if(time - lastTime < 5){
-                    return; // ignore interrupt
-                }
-                lastTime = time;
-            #endif
             Quadrature *instance = static_cast<Quadrature*>(arg); // get this instance.
             instance->checkChange();
-
         }
     }
     gpio_num_t _clk;

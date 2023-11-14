@@ -42,18 +42,18 @@ class GpioDriver : public IBool, public EdgeSubject{
     }
     private :
     gpio_num_t _pinNum;
+    double lastTime = 0;
     static void ISR_gpio(void* arg){
         if(arg){ // if arg is not null
             // debounce
             #if GPIO_DEBOUNCE > 0
-                static double lastTime = 0;
                 double time = millis();
-                if(time - lastTime < GPIO_DEBOUNCE){
+                GpioDriver *instance = static_cast<GpioDriver*>(arg); // get this instance.
+                if(time - instance->lastTime < GPIO_DEBOUNCE){
                     return; // ignore interrupt
                 }
-                lastTime = time;
+                instance->lastTime = time;
             #endif
-            GpioDriver *instance = static_cast<GpioDriver*>(arg); // get this instance.
             instance->checkEdge();
         }
     }
