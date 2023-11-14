@@ -15,6 +15,9 @@ class MenuSelectionLeds
             }
         }
     }
+    LedDriver* getLed(int channel){
+        return &_leds[channel];
+    }
     private:
     LedDriver _leds[5];
 };

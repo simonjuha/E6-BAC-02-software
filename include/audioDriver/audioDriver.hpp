@@ -3,6 +3,7 @@
 #include "sdCardDriver/sample.hpp"
 #include "sdCardDriver/sdCardDriver.hpp"
 #include "audioDriver/playbackAlgorithm.hpp"
+#include "booleanDriver/gateDriver.hpp"
 #include <SPI.h>
 #include <vector>
 
@@ -67,27 +68,43 @@ class AudioDriver : public IParameterObserver{
         uint32_t currentTime = micros();
         if(currentTime - lastSampleTime >= sampleInterval){
 
+            /* CHANNEL 0 SELECT */
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_1, HIGH);
-
             digitalWrite(AUDIO_SPI_LR_1, HIGH);
-            int8_t sampleByte0 = (int8_t)algorithms[0]->play(sampleSlot[0]);
-            vspi->transfer(static_cast<uint8_t>(sampleByte0* _sampleVolume[0])) ;
 
+            if(gate(0) == 1)
+            {
+                int8_t sampleByte0 = (int8_t)algorithms[0]->play(sampleSlot[0]);
+                vspi->transfer(static_cast<uint8_t>(sampleByte0* _sampleVolume[0])) ;
+            }
+
+            /* CHANNEL 1 SELECT */
             digitalWrite(AUDIO_SPI_LR_1, LOW);
-            int8_t sampleByte1 = (int8_t)algorithms[1]->play(sampleSlot[1]);
-            vspi->transfer(static_cast<uint8_t>(sampleByte1* _sampleVolume[1]));
+            if(gate(1) == 1)
+            {
+                int8_t sampleByte1 = (int8_t)algorithms[1]->play(sampleSlot[1]);
+                vspi->transfer(static_cast<uint8_t>(sampleByte1* _sampleVolume[1]));
+            }
 
+            /* CHANNEL 2 SELECT */
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_1, LOW);
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, HIGH);
-
             digitalWrite(AUDIO_SPI_LR_2, HIGH);
-            int8_t sampleByte2 = (int8_t)algorithms[2]->play(sampleSlot[2]);
-            vspi->transfer(static_cast<uint8_t>(sampleByte2* _sampleVolume[2])) ;
 
+            if(gate(2) == 1)
+            {
+                int8_t sampleByte2 = (int8_t)algorithms[2]->play(sampleSlot[2]);
+                vspi->transfer(static_cast<uint8_t>(sampleByte2* _sampleVolume[2])) ;
+            }
+
+            /* CHANNEL 3 SELECT */
             digitalWrite(AUDIO_SPI_LR_2, LOW);
+
+            if(gate(3) == 1){
             int8_t sampleByte3 = (int8_t)algorithms[3]->play(sampleSlot[3]);
             vspi->transfer(static_cast<uint8_t>(sampleByte3* _sampleVolume[3]));
-
+            }
+            
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, LOW);
             
             lastSampleTime = currentTime;
@@ -163,6 +180,7 @@ class AudioDriver : public IParameterObserver{
     Sample sampleSlot[NUM_OF_CHANNELS]; // 4 samples to be played
     playbackAlgorithm * algorithms[NUM_OF_CHANNELS];
     double _sampleVolume[NUM_OF_CHANNELS];
+    GateInputs _gateInputs;
     uint32_t sampleInterval = SAMPLE_INTERVAL;
     std::map<int, std::string> _sampleMap;
     // singleton stuff
@@ -170,4 +188,24 @@ class AudioDriver : public IParameterObserver{
     AudioDriver(AudioDriver const&); // copy constructor is private
     AudioDriver& operator=(AudioDriver const&); // assignment operator is private
     ~AudioDriver(){};
+    // method decides if something is transfered or not
+    bool gate(int gateChannel){
+        if(gateChannel >= 0 && gateChannel < NUM_OF_CHANNELS){
+            if(_gateInputs.read(gateChannel) == 1){
+                // transfer something
+                return true;
+            }
+            else
+            {
+                // no gate dont transfer
+                vspi->transfer(0);
+                return false;
+            }
+        }
+        else
+        {
+            ESP_LOGE("AudioDriver", "Invalid gate channel");
+            return false;
+        }
+    }
 };
