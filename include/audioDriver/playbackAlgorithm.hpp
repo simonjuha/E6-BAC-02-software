@@ -79,3 +79,37 @@ class pingPongAlgorithm : public playbackAlgorithm
     private:
     bool direction = true;
 };
+
+// play small chunks of the sample
+// finds new random position after grain is played
+class granularAlgorithm : public playbackAlgorithm{
+    public:
+    int16_t & play(Sample &sample){
+        if(isAtEnd(sample)){
+            reset(sample);
+        }
+        return sample.buffer[grainStartPositions + currentGrainPosition++];
+    }
+    bool isAtEnd(Sample &sample){
+        bool end = (currentGrainPosition >= grainSize);
+        if(end){
+            reset(sample);
+        }
+        return end;
+    }
+    void reset(Sample &sample){
+        grainSize = sample.size / 8;
+        if(sample.size > grainSize){
+            grainStartPositions = random(0, sample.size - grainSize);
+        } else {
+            grainStartPositions = 0;
+        }
+        currentGrainPosition = 0;
+    }
+        
+    private:
+    unsigned int currentGrainPosition = 0;
+    unsigned int grainStartPositions = 0;
+    unsigned int grainSize = 16;
+};
+

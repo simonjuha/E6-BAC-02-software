@@ -144,6 +144,9 @@ class AudioDriver : public IParameterObserver{
             else if(newValue == 2){
                 algorithms[_channelSelect] = new pingPongAlgorithm();
             }
+            else if(newValue == 3){
+                algorithms[_channelSelect] = new granularAlgorithm();
+            }
             else{
                 ESP_LOGW("AudioDriver", "Invalid algorithm value");
             }

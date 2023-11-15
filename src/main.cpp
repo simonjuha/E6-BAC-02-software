@@ -88,7 +88,7 @@ void setup() {
 
     // get sample names from SD card
     auto sampleNames =      std::make_shared<std::vector<std::string>>(SdCardDriver::getInstance().getSampleNames());
-    auto algorithNames =    std::make_shared<std::vector<std::string>>(std::vector<std::string>{"forward", "backward", "pingpong"});
+    auto algorithNames =    std::make_shared<std::vector<std::string>>(std::vector<std::string>{"forward", "backward", "pingpong","granular"});
     auto gateModeNames =    std::make_shared<std::vector<std::string>>(std::vector<std::string>{"hold", "once", "loop"});
 
 
