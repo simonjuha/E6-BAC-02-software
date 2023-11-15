@@ -40,7 +40,7 @@ class AudioDriver : public IParameterObserver{
     }
     void init(){
         vspi = new SPIClass(AUDIO_SPI_BUS);
-        vspi->setFrequency(10000000);
+        vspi->setFrequency(60000000);
         vspi->begin(AUDIO_SPI_CLK, 7, AUDIO_SPI_DAT);
         pinMode(AUDIO_SPI_LR_1, OUTPUT);
         pinMode(AUDIO_SPI_LR_2, OUTPUT);
