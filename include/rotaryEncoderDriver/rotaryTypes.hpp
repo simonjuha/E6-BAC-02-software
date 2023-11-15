@@ -2,48 +2,46 @@
 #include "rotaryEncoderDriver/quardratureDriver.hpp"
 #include "menuStructure/menu.hpp"
 
-class SelectorRotary : public IRotaryObserver{
-    public:
-        SelectorRotary(){}
-        SelectorRotary(MenuSelector *ui) : _rotary(2,1)
-        {
-            _rotary.attach(this);
-            _menuUISelector = ui;
-        }
-        void up(){
-            _menuUISelector->getSelectedMenu()->next();
+class BaseRotary : public IRotaryObserver {
+public:
+    BaseRotary(int pin1, int pin2, MenuSelector *ui) : _rotary(pin1, pin2) {
+        _rotary.attach(this);
+        _menuUISelector = ui;
+    }
 
-        }
-        void down(){
-            _menuUISelector->getSelectedMenu()->previous();
-        }
-    private:
-        Quadrature _rotary;
-        MenuSelector *_menuUISelector;
-        MenuUI *_selected;
+protected:
+    Quadrature _rotary;
+    MenuSelector *_menuUISelector;
 };
 
-// change parameter value
-class ValueRotary : public IRotaryObserver{
-    public:
-        ValueRotary(){}
-        ValueRotary(MenuSelector *ui) : _rotary(35,36)
-        {
-            _rotary.attach(this);
-            _menuUISelector = ui;
-        }
-        void up(){
-            parameter()->increment();
-            _menuUISelector->getSelectedMenu()->refresh();
-        }
-        void down(){
-            parameter()->decrement();
-            _menuUISelector->getSelectedMenu()->refresh();
-        }
+class SelectorRotary : public BaseRotary {
+public:
+    SelectorRotary() : BaseRotary(2, 1, nullptr) {}
+    SelectorRotary(MenuSelector *ui) : BaseRotary(2, 1, ui) {}
+
+    void up() {
+        _menuUISelector->getSelectedMenu()->next();
+    }
+
+    void down() {
+        _menuUISelector->getSelectedMenu()->previous();
+    }
+};
+
+class ValueRotary : public BaseRotary {
+public:
+    ValueRotary() : BaseRotary(35, 36, nullptr) {}
+    ValueRotary(MenuSelector *ui) : BaseRotary(35, 36, ui) {}
+    void up() {
+        parameter()->increment();
+        _menuUISelector->getSelectedMenu()->refresh();
+    }
+    void down() {
+        parameter()->decrement();
+        _menuUISelector->getSelectedMenu()->refresh();
+    }
     private:
         std::shared_ptr<IParameterControl> parameter(){
-            return _menuUISelector->getSelectedMenu()->getSelected();
-        }
-        Quadrature _rotary;
-        MenuSelector *_menuUISelector;
+        return _menuUISelector->getSelectedMenu()->getSelected();
+    }
 };
