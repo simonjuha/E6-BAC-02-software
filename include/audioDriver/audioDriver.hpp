@@ -61,10 +61,10 @@ class AudioDriver : public IParameterObserver{
         SdCardDriver::getInstance().getSampleByName("tone.wav", sampleSlot[3]);
 
         // load default volume
-        _sampleVolume[0] = 0.5f;
-        _sampleVolume[1] = 0.5f;
-        _sampleVolume[2] = 0.5f;
-        _sampleVolume[3] = 0.5f;
+        _sampleVolume[0] = 1.0f;
+        _sampleVolume[1] = 1.0f;
+        _sampleVolume[2] = 1.0f;
+        _sampleVolume[3] = 1.0f;
 
 
     }
@@ -82,7 +82,8 @@ class AudioDriver : public IParameterObserver{
             if(gate(0))
             {
                 int8_t sampleByte0 = (int8_t)algorithms[0]->play(sampleSlot[0]);
-                vspi->transfer(static_cast<uint8_t>(sampleByte0* _sampleVolume[0])) ;
+                uint8_t sampleByte0u = static_cast<uint8_t>(sampleByte0* _sampleVolume[0] * globalVolume);
+                vspi->transfer(sampleByte0u) ;
             }
 
             /* CHANNEL 1 SELECT */
@@ -90,7 +91,8 @@ class AudioDriver : public IParameterObserver{
             if(gate(1))
             {
                 int8_t sampleByte1 = (int8_t)algorithms[1]->play(sampleSlot[1]);
-                vspi->transfer(static_cast<uint8_t>(sampleByte1* _sampleVolume[1]));
+                uint8_t sampleByte1u = static_cast<uint8_t>(sampleByte1* _sampleVolume[1] * globalVolume);
+                vspi->transfer(sampleByte1u);
             }
 
             /* CHANNEL 2 SELECT */
@@ -101,15 +103,17 @@ class AudioDriver : public IParameterObserver{
             if(gate(2))
             {
                 int8_t sampleByte2 = (int8_t)algorithms[2]->play(sampleSlot[2]);
-                vspi->transfer(static_cast<uint8_t>(sampleByte2* _sampleVolume[2])) ;
+                uint8_t sampleByte2u = static_cast<uint8_t>(sampleByte2* _sampleVolume[2] * globalVolume);
+                vspi->transfer(sampleByte2u) ;
             }
 
             /* CHANNEL 3 SELECT */
             digitalWrite(AUDIO_SPI_LR_2, LOW);
 
             if(gate(3)){
-            int8_t sampleByte3 = (int8_t)algorithms[3]->play(sampleSlot[3]);
-            vspi->transfer(static_cast<uint8_t>(sampleByte3* _sampleVolume[3]));
+                int8_t sampleByte3 = (int8_t)algorithms[3]->play(sampleSlot[3]);
+                uint8_t sampleByte3u = static_cast<uint8_t>(sampleByte3* _sampleVolume[3] * globalVolume);
+                vspi->transfer(sampleByte3u);
             }
 
             digitalWrite(AUDIO_SPI_ANDLOGIC_CS_2, LOW);
@@ -194,6 +198,18 @@ class AudioDriver : public IParameterObserver{
             }
             return;
         }
+        if(name == "globalVolume"){
+            if(newValue < 0){
+                globalVolume = 0;
+                return;
+            }
+            if(newValue > 2){
+                globalVolume = 2;
+                return;
+            }
+            globalVolume = newValue;
+            return;
+        }
     }
 
     private:
@@ -205,6 +221,7 @@ class AudioDriver : public IParameterObserver{
     GateMode _gateModes[NUM_OF_CHANNELS] = {HOLD_MODE, HOLD_MODE, HOLD_MODE, HOLD_MODE};
     bool triggeredSamples[NUM_OF_CHANNELS] = {false, false, false, false};
     GateInputs _gateInputs;
+    float globalVolume = 1.0f;
     uint32_t sampleInterval = SAMPLE_INTERVAL;
     std::map<int, std::string> _sampleMap;
     // singleton stuff

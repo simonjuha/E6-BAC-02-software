@@ -93,16 +93,20 @@ void setup() {
 
 
     // common parameters for channels
-    FloatParameter    volume =    {"volume", 0, 1, 0.5};
+    FloatParameter    volume =    {"volume", 0, 1, 1.0};
     OptionParameter sample =    {"sample", sampleNames, 0};
     OptionParameter algorithm = {"playback", algorithNames, 0};
     OptionParameter gateMode = {"gateMode", gateModeNames, 0};
 
     // global parameters
     IntParameter    sampleRate ={"sampleRate", 1, 124000, 44100, 500 };
+    FloatParameter  globalVolume = {"globalVolume", 0, 2, 1.0};
     auto global_samplerate = std::make_shared<IntParameter>(sampleRate);
+    auto global_volume = std::make_shared<FloatParameter>(globalVolume);
     globalMenu.addUIElement(global_samplerate);
+    globalMenu.addUIElement(global_volume);
     global_samplerate->attach("sampleRate", &AudioDriver::getInstance());
+    global_volume->attach("globalVolume", &AudioDriver::getInstance());
     
     auto volume_channel1 = std::make_shared<FloatParameter>(volume);
     auto volume_channel2 = std::make_shared<FloatParameter>(volume);
