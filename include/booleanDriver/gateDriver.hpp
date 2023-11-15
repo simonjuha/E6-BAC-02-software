@@ -3,10 +3,10 @@
 #include "booleanDriver/boolEdge.hpp"
 #include "Arduino.h"
 
-#define AUDIO_GATE_1 18
-#define AUDIO_GATE_2 8
-#define AUDIO_GATE_3 3
-#define AUDIO_GATE_4 46
+#define AUDIO_GATE_1 46
+#define AUDIO_GATE_2 3
+#define AUDIO_GATE_3 8
+#define AUDIO_GATE_4 18
 
 class GateObserver : public IEdgeObserver
 {
