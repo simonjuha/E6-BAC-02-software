@@ -36,12 +36,11 @@ public:
 private:
     void checkChange(){
         #if QUARDRATURE_DEBOUNCE
-            static unsigned long lastTime = 0;
-            unsigned long time = millis();
-            if(time - lastTime < QUARDRATURE_DEBOUNCE){
+            unsigned long nowTime = millis();
+            if(nowTime - lastTime < QUARDRATURE_DEBOUNCE){
                 return; // ignore interrupt
             }
-            lastTime = time;
+            lastTime = nowTime;
         #endif
         // check if clk has changed since last check, if it has check if clk == dt, if so up, else down.
         clkNewState = gpio_get_level(_clk);
@@ -66,6 +65,9 @@ private:
     gpio_num_t _dt;
     bool clkLastState = false;
     bool clkNewState = false;
+    #if QUARDRATURE_DEBOUNCE
+        unsigned long lastTime = 0;
+    #endif
 };
 
 
