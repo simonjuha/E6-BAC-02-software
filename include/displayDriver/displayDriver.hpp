@@ -81,8 +81,6 @@ class DisplayDriver{
             return;
         }
         _lines = lines;
-        refreshPositions();
-        writeRelativeLines();
     }
     
     void clear(){
