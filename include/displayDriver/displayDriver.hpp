@@ -63,6 +63,7 @@ class DisplayDriver{
             return;
         }
         _selectedLine = sel;
+        clear();
         refreshPositions();
         writeRelativeLines();
     }
