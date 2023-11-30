@@ -213,17 +213,17 @@ class AudioDriver : public IParameterObserver{
     }
 
     private:
-    SPIClass *vspi;
-    int _channelSelect = 0;
+    SPIClass *vspi; // SPI bus
+    int _channelSelect = 0; // currently selected channel
     Sample sampleSlot[NUM_OF_CHANNELS]; // 4 samples to be played
     playbackAlgorithm * algorithms[NUM_OF_CHANNELS];
     double _sampleVolume[NUM_OF_CHANNELS];
     GateMode _gateModes[NUM_OF_CHANNELS] = {HOLD_MODE, HOLD_MODE, HOLD_MODE, HOLD_MODE};
     bool triggeredSamples[NUM_OF_CHANNELS] = {false, false, false, false};
-    GateInputs _gateInputs;
-    float globalVolume = 1.0f;
-    uint32_t sampleInterval = SAMPLE_INTERVAL;
-    std::map<int, std::string> _sampleMap;
+    GateInputs _gateInputs; // 4 gate inputs
+    float globalVolume = 1.0f; // global volume
+    uint32_t sampleInterval = SAMPLE_INTERVAL; // sample interval in microseconds
+    std::map<int, std::string> _sampleMap; // map of sample names
     // singleton stuff
     AudioDriver(){};
     AudioDriver(AudioDriver const&); // copy constructor is private
