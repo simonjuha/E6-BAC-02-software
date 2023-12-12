@@ -9,25 +9,25 @@
 class MenuUI {
     public:
         void addUIElement(std::shared_ptr<IParameterControl> displayable){
-            _parameters.push_back(displayable);
+            _parameters.push_back(displayable); // add parameter to vector
         }
-        std::shared_ptr<IParameterControl> getSelected(){
+        std::shared_ptr<IParameterControl> getSelected(){ // get the currently selected parameter
             if(_selected == nullptr){
-                _selected = _parameters[_selectedIndex];
+                _selected = _parameters[_selectedIndex]; // if no parameter is selected, select the first one
             }
             return _selected;
         }
         void refresh(){
-            if(_parameters.size() == 0){
+            if(_parameters.size() == 0){ // if no parameters, return
                 ESP_LOGW("MenuUI", "No parameters to display");
                 return;
             }
-            _lines.clear();
+            _lines.clear(); // clear lines vector
             for(int i = 0; i < _parameters.size(); i++){
-                _lines.push_back(getParameterString(_parameters[i]));
+                _lines.push_back(getParameterString(_parameters[i])); // add parameter string to lines vector from parameter vector
             }
-            DisplayDriver::getInstance().setLines(_lines);
-            DisplayDriver::getInstance().select(_selectedIndex);
+            DisplayDriver::getInstance().setLines(_lines);      // set lines to display (displayDriver)
+            DisplayDriver::getInstance().select(_selectedIndex);// select the first parameter (displayDriver)
         }
 
         int size(){
@@ -35,12 +35,12 @@ class MenuUI {
         }
 
         void next(){
-            if(_selectedIndex < size()){
+            if(_selectedIndex < size()){ // if not last parameter, select next
                 _selectedIndex++;
             }else{
-                _selectedIndex = 0;
+                _selectedIndex = 0; // if last parameter, select first
             }
-            DisplayDriver::getInstance().select(_selectedIndex);
+            DisplayDriver::getInstance().select(_selectedIndex); // set selected index (displayDriver)
             _selected = _parameters[_selectedIndex];
         }
         void previous(){
@@ -53,7 +53,7 @@ class MenuUI {
             _selected = _parameters[_selectedIndex];
         }
     private:
-    std::string getParameterString(std::shared_ptr<IParameterControl> parameter){
+    std::string getParameterString(std::shared_ptr<IParameterControl> parameter){ // get parameter as string -> name : value
         return parameter->name() + " : " + parameter->value();
     }
     std::vector<std::shared_ptr<IParameterControl>> _parameters;
@@ -66,7 +66,7 @@ class MenuUI {
 class MenuSelector{
     public:
         MenuSelector(){}
-        void addMenu(MenuUI * menu){
+        void addMenu(MenuUI * menu){ // add menu to vector
             _menus.push_back(menu);
             if(_selectedMenu == nullptr){
                 _selectedMenu = menu;
@@ -80,7 +80,7 @@ class MenuSelector{
                 ESP_LOGW("MenuSelector", "Invalid menu index");
             }
         }
-        MenuUI* getSelectedMenu(){
+        MenuUI* getSelectedMenu(){ // get selected menu
             return _selectedMenu;
         }
 
