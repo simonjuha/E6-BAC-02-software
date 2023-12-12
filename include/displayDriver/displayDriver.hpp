@@ -31,17 +31,18 @@ class DisplayDriver{
         }
         _display.setTextColor(WHITE);
         _display.setTextSize(1);
-        _display.setRotation(2);
+        _display.setRotation(2); // adjust for upside down display
         _display.clearDisplay();
     }
 
+    // write 6 lines on the display with one selected
     void writeFixedLines(std::vector<std::string> lines, int selectedLine){
         int nLinesToPrint = std::min(_maxLines, static_cast<int>(lines.size()));
         for(int i=0; i < nLinesToPrint; i++){
                 std::string lineToPrint;
                 if(selectedLine == i){
-                    _display.fillRect(0,i*_lineHeight-2,_displayWidth,_lineHeight+1,WHITE);
-                    _display.setTextColor(BLACK);
+                    _display.fillRect(0,i*_lineHeight-2,_displayWidth,_lineHeight+1,WHITE); // highlight selected line
+                    _display.setTextColor(BLACK); // set text color to black
                     lineToPrint = ">" + lines[i];
                 }
                 else{
@@ -49,14 +50,15 @@ class DisplayDriver{
                     _display.setTextColor(WHITE);
                     lineToPrint = " " + lines[i];
                 }
-                _display.setCursor(0, i*_lineHeight);
-                _display.println(lineToPrint.c_str());
+                _display.setCursor(0, i*_lineHeight);  // set cursor to next line
+                _display.println(lineToPrint.c_str()); // print at cursor position
         }
 
         //_displayLines = lines;
         _display.display();
     }
 
+    // select: select line by index (and update display)
     void select(int sel){
         if(sel < 0 || sel >= _lines.size()){
             ESP_LOGW("DisplayDriver", "Invalid line selection");
@@ -68,6 +70,7 @@ class DisplayDriver{
         writeRelativeLines();
     }
 
+    // writeRelativeLines: write lines on display based on selected line
     void writeRelativeLines(){
     auto startIt = _lines.begin() + _scroll;
     auto endIt = (_lines.size() < _maxLines) ? _lines.end() : startIt + _maxLines;
@@ -75,6 +78,7 @@ class DisplayDriver{
         writeFixedLines(fixedLines, _relativeSelectedLine);
     }
 
+    // setLines: set lines that will be displayed
     void setLines(std::vector<std::string> lines){
         if (lines.size() == 0)
         {
@@ -91,33 +95,33 @@ class DisplayDriver{
 
     private:
     // recalculate the position based on seleect display height vector length etc.
-void refreshPositions() {
-    _listLines = _lines.size(); // Get the total number of lines
-    _scroll = 0; // Default scroll to 0
-    _relativeSelectedLine = _selectedLine; // By default, the relative selected line is the same as the selected line
+    void refreshPositions() {
+        _listLines = _lines.size(); // Get the total number of lines
+        _scroll = 0; // Default scroll to 0
+        _relativeSelectedLine = _selectedLine; // By default, the relative selected line is the same as the selected line
 
-    // If the number of lines is less than _maxLines, no need to scroll or adjust
-    if (_listLines > _maxLines) {
-        // If the selected line is beyond the visible display
-        if (_selectedLine >= _maxLines) {
-            _scroll = _selectedLine - _maxLines + 1; // Calculate scroll position
-            _relativeSelectedLine = _maxLines - 1; // Set the relative selected line to the last visible line
-        } else {
-            // If the selected line is within the visible display, no need to scroll
-            _scroll = 0;
-            _relativeSelectedLine = _selectedLine;
+        // If the number of lines is less than _maxLines, no need to scroll or adjust
+        if (_listLines > _maxLines) {
+            // If the selected line is beyond the visible display
+            if (_selectedLine >= _maxLines) {
+                _scroll = _selectedLine - _maxLines + 1; // Calculate scroll position
+                _relativeSelectedLine = _maxLines - 1; // Set the relative selected line to the last visible line
+            } else {
+                // If the selected line is within the visible display, no need to scroll
+                _scroll = 0;
+                _relativeSelectedLine = _selectedLine;
+            }
+
+            // If the scroll is beyond the list length, adjust it
+            if (_scroll > _listLines - _maxLines) {
+                _scroll = _listLines - _maxLines;
+            }
         }
 
-        // If the scroll is beyond the list length, adjust it
-        if (_scroll > _listLines - _maxLines) {
-            _scroll = _listLines - _maxLines;
-        }
+        // Ensure the relative selected line is within bounds
+        _relativeSelectedLine = std::min(_relativeSelectedLine, _maxLines - 1);
+        _relativeSelectedLine = std::max(0, _relativeSelectedLine); // Ensure it's not negative
     }
-
-    // Ensure the relative selected line is within bounds
-    _relativeSelectedLine = std::min(_relativeSelectedLine, _maxLines - 1);
-    _relativeSelectedLine = std::max(0, _relativeSelectedLine); // Ensure it's not negative
-}
 
     DisplayDriver(){}
     DisplayDriver(DisplayDriver const&) = delete;
