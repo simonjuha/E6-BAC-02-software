@@ -22,7 +22,7 @@ class GpioDriver : public IBool, public EdgeSubject{
         pin_config.pull_up_en = (pullDirection == PullDirection::UP) ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE;
         pin_config.pull_down_en = (pullDirection == PullDirection::DOWN) ? GPIO_PULLDOWN_ENABLE : GPIO_PULLDOWN_DISABLE;
         pin_config.intr_type = GPIO_INTR_ANYEDGE; // trigger on any edge
-        gpio_config(&pin_config);
+        gpio_config(&pin_config); // configure gpio with pin_config
         gpio_install_isr_service(0); // install isr service
         gpio_isr_handler_add(_pinNum, ISR_gpio, this); // add isr handler
         gpio_intr_enable(_pinNum); // enable gpio interrupt
@@ -33,7 +33,7 @@ class GpioDriver : public IBool, public EdgeSubject{
         return gpio_get_level(_pinNum); // simple read from IBool
     }
     void checkEdge(){
-        if(read()){
+        if(read()){ // if pin is high -> rise
             rise();
         }
         else{
@@ -47,14 +47,14 @@ class GpioDriver : public IBool, public EdgeSubject{
         if(arg){ // if arg is not null
             // debounce
             #if GPIO_DEBOUNCE > 0
-                double time = millis();
+                double time = millis(); // get current time
                 GpioDriver *instance = static_cast<GpioDriver*>(arg); // get this instance.
                 if(time - instance->lastTime < GPIO_DEBOUNCE){
                     return; // ignore interrupt
                 }
-                instance->lastTime = time;
+                instance->lastTime = time; // set last time (of this instance)
             #endif
-            instance->checkEdge();
+            instance->checkEdge(); // check which edge change
         }
     }
     
